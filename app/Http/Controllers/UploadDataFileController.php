@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UploadDataFileRequest;
-use App\Models\UploadDataFile;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 
@@ -19,7 +16,7 @@ class UploadDataFileController extends Controller
         return view('uploadDataFile');
     }
 
-    public function create(Request $request): JsonResponse
+    public function create(Request $request): Factory|View|JsonResponse
     {
         $request->validate([
             'file_type' => 'required|string',
@@ -59,11 +56,10 @@ class UploadDataFileController extends Controller
         $pythonOutput = $process->getOutput();
         $pythonResponse = json_decode($pythonOutput, true);
 
-        return response()->json([
-//            'status' => 'success',
-//            'file_path' => $absolutePath,
-            'python_response' => $pythonResponse,
-//            'python_raw_output' => $pythonOutput
+        return view('dataPreview', [
+            'file_path' => $absolutePath,
+            'file_type' => $request->file_type,
+            'columns' => $pythonResponse['columns_info'],
         ]);
 
 

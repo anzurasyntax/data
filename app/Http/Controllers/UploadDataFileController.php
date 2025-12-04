@@ -56,6 +56,7 @@ class UploadDataFileController extends Controller
         $pythonOutput = $process->getOutput();
         $pythonResponse = json_decode($pythonOutput, true);
 
+        dd($pythonResponse);
         return view('dataPreview', [
             'file_path' => $absolutePath,
             'file_type' => $request->file_type,

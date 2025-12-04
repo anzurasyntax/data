@@ -25,11 +25,11 @@
         <select name="file_type" id="fileType"
                 class="w-full p-3 rounded-lg mb-5 bg-white/20 text-white border border-white/40 focus:ring-2 focus:ring-blue-400"
                 required>
-            <option value="">-- Select File Type --</option>
-            <option value="txt">TXT</option>
-            <option value="csv">CSV</option>
-            <option value="xml">XML</option>
-            <option value="xlsx">XLSX</option>
+            <option class="text-black" value="">-- Select File Type --</option>
+            <option class="text-black" value="txt">TXT</option>
+            <option class="text-black" value="csv">CSV</option>
+            <option class="text-black" value="xml">XML</option>
+            <option class="text-black" value="xlsx">XLSX</option>
         </select>
 
         <label class="block text-white font-semibold mb-2">Upload File</label>

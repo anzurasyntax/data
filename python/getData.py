@@ -13,7 +13,8 @@ result = {
     "file_path": file_path,
     "rows": None,
     "columns": None,
-    "columns_info": []
+    "columns_info": [],
+    "data": []
 }
 
 def to_python_value(val):
@@ -58,24 +59,18 @@ try:
         # ---- NUMERIC COLUMNS ----
         if pd.api.types.is_numeric_dtype(series):
             desc = series.describe()
-
             allowed_stats = ["count", "mean", "std", "min", "25%", "50%", "75%", "max"]
-
             for stat in allowed_stats:
                 if stat in desc:
                     col_info["stats"][stat] = to_python_value(desc[stat])
 
-        # ---- CATEGORICAL / STRING COLUMNS ----
         elif pd.api.types.is_object_dtype(series):
             desc = series.describe()
-
             allowed_stats = ["count", "unique", "top", "freq"]
-
             for stat in allowed_stats:
                 if stat in desc:
                     col_info["stats"][stat] = to_python_value(desc[stat])
 
-        # ---- OTHER COLUMN TYPES (date, bool, etc.) ----
         else:
             desc = series.describe(include="all")
             for stat_name, stat_value in desc.items():
@@ -85,8 +80,9 @@ try:
 
     result["columns_info"] = columns_info
 
+    result["data"] = df.where(pd.notnull(df), None).to_dict(orient="records")
+
 except Exception as e:
     result["error"] = str(e)
 
-# SAFE JSON OUTPUT
 print(json.dumps(result, default=str))

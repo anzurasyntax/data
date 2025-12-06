@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UploadDataFileRequest;
 use App\Models\UploadDataFile;
+use App\Models\UploadedFile;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -19,29 +20,46 @@ class UploadDataFileController extends Controller
         return view('uploadDataFile');
     }
 
-    public function create(Request $request): JsonResponse
+    public function create(Request $request)
     {
         $request->validate([
             'file_type' => 'required|string',
             'file' => 'required|file'
         ]);
 
-        $savedPath = $request->file('file')->store('uploads');
-        $absolutePath = str_replace('/', DIRECTORY_SEPARATOR, storage_path('app/private/' . $savedPath));
+        $path = $request->file('file')->store('uploads');
 
-        $pythonScriptPath = base_path('python' . DIRECTORY_SEPARATOR . 'getData.py');
-
-        $payload = json_encode([
+        $saved = \App\Models\UploadedFile::create([
+            'original_name' => $request->file('file')->getClientOriginalName(),
             'file_type' => $request->file_type,
-            'file_path' => $absolutePath
+            'file_path' => $path,
+            'mime_type' => $request->file('file')->getClientMimeType(),
+            'file_size' => $request->file('file')->getSize(),
         ]);
 
-        Log::info('Python script path: ' . $pythonScriptPath);
-        Log::info('File path: ' . $absolutePath);
+        $files = UploadedFile::all();
+
+        return redirect()->route('files');
+
+    }
+
+    public function getAllFiles(){
+        $files = UploadedFile::all();
+        return view('uploadedFiles', compact('files'));
+    }
+    public function processFile($id)
+    {
+        $file = UploadedFile::findOrFail($id);
+
+        // Build payload for Python
+        $payload = json_encode([
+            'file_type' => $file->file_type,
+            'file_path' => storage_path('app/private/' . $file->file_path)
+        ]);
 
         $process = new Process([
             'python',
-            $pythonScriptPath,
+            base_path('python/process_file.py'),
             $payload
         ]);
 
@@ -49,25 +67,42 @@ class UploadDataFileController extends Controller
 
         if (!$process->isSuccessful()) {
             return response()->json([
-                'status' => 'python_error',
-                'error_message' => $process->getErrorOutput(),
-                'file_path' => $absolutePath,
-                'python_output' => $process->getOutput(),
+                'error' => $process->getErrorOutput()
             ]);
         }
 
-        $pythonOutput = $process->getOutput();
-        $pythonResponse = json_decode($pythonOutput, true);
+        // Get raw Python output
+        $output = $process->getOutput();
 
-        return response()->json([
-//            'status' => 'success',
-//            'file_path' => $absolutePath,
-            'python_response' => $pythonResponse,
-//            'python_raw_output' => $pythonOutput
+        // Remove starting & ending quotes added by Windows shell
+        if (str_starts_with(trim($output), '"') && str_ends_with(trim($output), '"')) {
+            $output = trim($output, "\"");
+        }
+
+        // Fix escaped characters
+        $output = stripcslashes($output);
+
+        // Decode JSON
+        $result = json_decode($output, true);
+
+        // Debug if decoding fails
+        if ($result === null) {
+            return response()->json([
+                'error' => 'JSON decode failed',
+                'output' => $output,
+                'message' => json_last_error_msg()
+            ]);
+        }
+
+        return view('previewDataFile', [
+            'file' => $file,
+            'result' => $result
         ]);
-
-
-
     }
+
+
+
+
+
 
 }

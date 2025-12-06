@@ -21,7 +21,7 @@
     <h2 class="text-3xl font-bold text-white text-center mb-6">Upload Your Data File</h2>
 
     <!-- Form -->
-    <form action="{{ route('create') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+    <form action="{{ route('files.store') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
         @csrf
 
         <!-- File Type -->

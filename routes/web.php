@@ -1,17 +1,12 @@
 <?php
 
-use App\Http\Controllers\UploadDataFileController;
+use App\Http\Controllers\FileProcessingController;
+use App\Http\Controllers\UploadedFileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
-Route::get('/', [UploadDataFileController::class, 'index'])->name('index');
+Route::redirect('/', '/files')->name('home');
 
-Route::post('/create', [UploadDataFileController::class, 'create'])->name('create');
+Route::resource('files', UploadedFileController::class)->only(['index', 'store']);
 
-
-Route::get('/files', [UploadDataFileController::class, 'getAllFiles'])->name('files');
-
-Route::get('/process-file/{id}', [UploadDataFileController::class, 'processFile'])->name('process.file');
+Route::resource('process', FileProcessingController::class)->only(['index', 'show']);

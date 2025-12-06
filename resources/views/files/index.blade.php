@@ -31,7 +31,7 @@
                 <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
 
                 <td class="border px-4 py-2">
-                    <a href="{{ route('process.file', $file->id) }}" class="text-blue-600 underline">
+                    <a href="{{ route('process.show', $file->id) }}" class="text-blue-600 underline">
                         {{ $file->original_name }}
                     </a>
 

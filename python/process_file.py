@@ -4,10 +4,9 @@ payload = json.loads(sys.argv[1])
 file_path = payload["file_path"]
 file_type = payload["file_type"]
 
-# Load data
+
 df = pd.read_csv(file_path) if file_type == "csv" else pd.DataFrame()
 
-# Initialize stats
 column_stats = {}
 
 for col in df.columns:
@@ -33,10 +32,9 @@ for col in df.columns:
         "unique_values": int(col_data.nunique())
     }
 
-# Replace NaN for JSON
+
 df = df.replace({np.nan: None})
 
-# Build result
 result = {
     "rows": len(df),
     "columns": len(df.columns),

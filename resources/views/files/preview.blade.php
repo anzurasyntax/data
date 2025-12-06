@@ -95,12 +95,8 @@
     </div>
 </div>
 
-<!-- Main Layout -->
 <div class="grid grid-cols-12 gap-6">
-
-    <!-- LEFT: Excel-like Table -->
     <div class="col-span-12 lg:col-span-8 bg-white shadow-sm rounded-lg border border-slate-200 overflow-hidden">
-
         <div class="bg-slate-700 px-6 py-4 border-b border-slate-600">
             <h3 class="text-lg font-bold text-white flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,10 +187,7 @@
         </div>
     </div>
 
-    <!-- RIGHT: Data Cleaning Options -->
     <div class="col-span-12 lg:col-span-4 space-y-5">
-
-        <!-- Statistics Overview -->
         <div class="bg-white shadow-sm rounded-lg border border-slate-200 overflow-hidden">
             <div class="bg-slate-700 px-6 py-4 border-b border-slate-600">
                 <h3 class="text-lg font-bold text-white flex items-center">
@@ -229,8 +222,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Cleaning Tools -->
         <div class="bg-white shadow-sm rounded-lg border border-slate-200 overflow-hidden">
             <div class="bg-slate-700 px-6 py-4 border-b border-slate-600">
                 <h3 class="text-lg font-bold text-white flex items-center">
@@ -242,7 +233,6 @@
             </div>
 
             <div class="p-5 space-y-3">
-                <!-- Remove Empty Rows -->
                 <div class="section-card p-4 rounded-lg">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
@@ -260,7 +250,6 @@
                     </div>
                 </div>
 
-                <!-- Remove Duplicates -->
                 <div class="section-card p-4 rounded-lg">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -277,8 +266,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Trim Spaces -->
                 <div class="section-card p-4 rounded-lg">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -295,8 +282,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Convert Data Types -->
                 <div class="section-card p-4 rounded-lg">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
@@ -314,7 +299,6 @@
                     </div>
                 </div>
 
-                <!-- Save Button -->
                 <div class="mt-5 pt-4 border-t border-slate-200">
                     <button class="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-lg w-full action-btn flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

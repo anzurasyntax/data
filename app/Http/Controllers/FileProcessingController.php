@@ -30,7 +30,7 @@ class FileProcessingController extends Controller
 
         $result = $this->pythonService->process('process_file.py', [
             'file_type' => $file->file_type,
-            'file_path' => storage_path("app/private/{$file->file_path}")
+            'file_path' => storage_path("app/public/{$file->file_path}")
         ]);
 
         return view('files.preview', compact('file', 'result'));

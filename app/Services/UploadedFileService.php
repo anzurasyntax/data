@@ -8,7 +8,7 @@ class UploadedFileService
 {
     public function store($fileType, $file): UploadedFile
     {
-        $path = $file->store('uploads');
+        $path = $file->store('uploads', 'public');
 
         return UploadedFile::create([
             'original_name' => $file->getClientOriginalName(),

@@ -1,0 +1,149 @@
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+.excel-cell {
+    min-width: 160px;
+    max-width: 320px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.column-header {
+    background: #f8fafc;
+    border-bottom: 2px solid #334155;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.stat-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin: 2px;
+    letter-spacing: 0.3px;
+}
+.data-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+.data-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+.stat-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    transition: all 0.2s ease;
+}
+.stat-card:hover {
+    border-color: #94a3b8;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 12px 0 8px 0;
+}
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+.table-container {
+    background: white;
+    border: 1px solid #e2e8f0;
+}
+.header-section {
+    background: #1e293b;
+    padding: 20px 28px;
+    border-bottom: 1px solid #334155;
+}
+.type-badge {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 10px;
+    background: white;
+    color: #475569;
+}
+.column-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+}
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: -0.01em;
+}
+.empty-cell {
+    background: #fef2f2;
+}
+.cell-value {
+    color: #334155;
+    font-weight: 500;
+    font-size: 13px;
+}
+.icon-svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+.editable-cell {
+    cursor: pointer;
+    position: relative;
+}
+.editable-cell:hover::after {
+    content: '✎';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+}
+.cell-input {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #3b82f6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+}
+.updating {
+    opacity: 0.6;
+    pointer-events: none;
+}
+.success-flash {
+    animation: flash-success 0.5s ease;
+}
+@keyframes flash-success {
+    0%, 100% { background-color: inherit; }
+    50% { background-color: #d1fae5; }
+}
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f4f6;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

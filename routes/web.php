@@ -10,3 +10,5 @@ Route::redirect('/', '/files')->name('home');
 Route::resource('files', UploadedFileController::class)->only(['index', 'store']);
 
 Route::resource('process', FileProcessingController::class)->only(['index', 'show']);
+
+Route::put('/files/{id}/cell', [FileProcessingController::class, 'updateCell']);

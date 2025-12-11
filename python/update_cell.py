@@ -12,15 +12,12 @@ def to_native(obj):
 def calculate_column_stats(df, col):
     col_data = df[col]
 
-    # Handle empty values
     empty_count = col_data.isna().sum() + (col_data.astype(str) == '').sum()
     actual_non_empty = col_data.replace('', np.nan).dropna()
 
-    # Try numeric conversion
     numeric_values = pd.to_numeric(col_data, errors='coerce')
     non_null_numeric = numeric_values.dropna()
 
-    # Detect data type
     if len(actual_non_empty) == 0:
         detected_type = "empty"
     else:
@@ -32,7 +29,6 @@ def calculate_column_stats(df, col):
         else:
             detected_type = "text"
 
-    # Calculate statistics
     stats = {}
     outlier_indexes = []
     outlier_count = 0
@@ -66,7 +62,6 @@ def calculate_column_stats(df, col):
         "stats": stats
     }, outlier_indexes
 
-# Parse input
 payload = json.loads(sys.argv[1])
 file_path = payload["file_path"]
 file_type = payload["file_type"]
@@ -74,20 +69,16 @@ row_index = payload["row_index"]
 column = payload["column"]
 new_value = payload.get("value", "")
 
-# Read file
 df = pd.read_csv(file_path) if file_type == "csv" else pd.DataFrame()
 
-# Update the cell
 if new_value == "" or new_value is None:
     df.at[row_index, column] = np.nan
 else:
     df.at[row_index, column] = new_value
 
-# Save back to file
 if file_type == "csv":
     df.to_csv(file_path, index=False)
 
-# Recalculate stats for ALL columns (since duplicates might be affected)
 column_stats = {}
 outlier_map = {}
 
@@ -95,13 +86,11 @@ for col in df.columns:
     col_stats, outlier_indexes = calculate_column_stats(df, col)
     column_stats[col] = col_stats
 
-    # Map outliers
     for idx in outlier_indexes:
         if str(idx) not in outlier_map:
             outlier_map[str(idx)] = {}
         outlier_map[str(idx)][col] = True
 
-# Get the updated value for response
 updated_value = df.at[row_index, column]
 if pd.isna(updated_value):
     updated_value = None

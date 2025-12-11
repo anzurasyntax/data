@@ -21,17 +21,13 @@ outlier_map = {}
 for col in df.columns:
     col_data = df[col]
 
-    # Handle empty values correctly
     empty_count = col_data.isna().sum() + (col_data.astype(str) == '').sum()
 
-    # Remove real empty values
     actual_non_empty = col_data.replace('', np.nan).dropna()
 
-    # Try numeric conversion
     numeric_values = pd.to_numeric(col_data, errors='coerce')
     non_null_numeric = numeric_values.dropna()
 
-    # ---------- FIXED DATA TYPE DETECTION ----------
     if len(actual_non_empty) == 0:
         detected_type = "empty"
     else:
@@ -44,7 +40,6 @@ for col in df.columns:
         else:
             detected_type = "text"
 
-    # ---------- STATISTICS ----------
     stats = {}
     outlier_count = 0
 
@@ -59,7 +54,7 @@ for col in df.columns:
         outlier_indexes = outlier_mask[outlier_mask].index.tolist()
         outlier_count = len(outlier_indexes)
 
-        # Map outlier cells
+
         for idx in outlier_indexes:
             if str(idx) not in outlier_map:
                 outlier_map[str(idx)] = {}
@@ -73,7 +68,6 @@ for col in df.columns:
             "std": round(non_null_numeric.std(), 2)
         }
 
-    # ---------- COLUMN STATS ----------
     column_stats[col] = {
         "empty_count": int(empty_count),
         "empty_percentage": round((empty_count / len(df)) * 100, 1) if len(df) else 0,
@@ -84,7 +78,6 @@ for col in df.columns:
         "stats": stats
     }
 
-# Replace NaN with None for JSON
 df = df.replace({np.nan: None})
 
 result = {

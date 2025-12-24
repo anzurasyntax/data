@@ -25,14 +25,19 @@ class FileProcessingController extends Controller
 
     public function show($id): Factory|View
     {
-        $file = $this->fileService->find($id);
+        try {
+            $file = $this->fileService->find($id);
 
-        $result = $this->pythonService->process('process_file.py', [
-            'file_type' => $file->file_type,
-            'file_path' => storage_path("app/public/{$file->file_path}")
-        ]);
+            $result = $this->pythonService->process('process_file.py', [
+                'file_type' => $file->file_type,
+                'file_path' => storage_path("app/public/{$file->file_path}")
+            ]);
 
-        return view('files.preview', compact('file', 'result'));
+            return view('files.preview', compact('file', 'result'));
+        } catch (\Exception $e) {
+            return redirect()->route('process.index')
+                ->with('error', 'Failed to process file: ' . $e->getMessage());
+        }
     }
 
     public function updateCell(Request $request, $id): JsonResponse

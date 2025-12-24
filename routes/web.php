@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/files')->name('home');
 
-Route::resource('files', UploadedFileController::class)->only(['index', 'store']);
+Route::resource('files', UploadedFileController::class)->only(['index', 'store', 'destroy']);
 
 Route::resource('process', FileProcessingController::class)->only(['index', 'show']);
 

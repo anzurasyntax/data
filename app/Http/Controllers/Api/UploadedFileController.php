@@ -12,6 +12,7 @@ use App\Services\UploadedFileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class UploadedFileController extends Controller
 {
@@ -67,25 +68,65 @@ class UploadedFileController extends Controller
 
     public function show(int $id): FileDetailResource|JsonResponse
     {
-        $file = $this->fileService->find($id);
+        try {
+            $file = $this->fileService->find($id);
 
-        if (!$file) {
+            if (!$file) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'File not found'
+                ], 404);
+            }
+
+            $result = $this->pythonService->process('process_file.py', [
+                'file_type' => $file->file_type,
+                'file_path' => storage_path("app/public/{$file->file_path}")
+            ]);
+
+            return (new FileDetailResource([
+                'file'   => $file,
+                'result' => $result
+            ]))->additional([
+                'status' => 'success'
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'File not found'
-            ], 404);
+                'status' => 'error',
+                'message' => 'Failed to process file: ' . $e->getMessage()
+            ], 500);
         }
+    }
 
-        $result = $this->pythonService->process('process_file.py', [
-            'file_type' => $file->file_type,
-            'file_path' => storage_path("app/public/{$file->file_path}")
-        ]);
+    public function destroy(int $id): JsonResponse
+    {
+        try {
+            $file = $this->fileService->find($id);
 
-        return (new FileDetailResource([
-            'file'   => $file,
-            'result' => $result
-        ]))->additional([
-            'status' => 'success'
-        ]);
+            if (!$file) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File not found'
+                ], 404);
+            }
+
+            // Delete physical file
+            $filePath = storage_path("app/public/{$file->file_path}");
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            // Delete database record
+            $file->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'File deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete file: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

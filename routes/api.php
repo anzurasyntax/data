@@ -14,3 +14,6 @@ Route::get('/files', [UploadedFileController::class, 'index']);
 Route::get('/file/{id}', [UploadedFileController::class, 'show']);
 
 Route::delete('/file/{id}', [UploadedFileController::class, 'destroy']);
+
+Route::get('/file/{id}/quality-check', [UploadedFileController::class, 'qualityCheck']);
+Route::post('/file/{id}/clean', [UploadedFileController::class, 'cleanData']);

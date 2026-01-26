@@ -183,13 +183,219 @@
     <div class="p-6">
         <!-- Header -->
         <div class="mb-5 bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-sm">
-            <h1 class="text-2xl font-semibold text-[#1e293b] flex items-center">
-                <svg class="w-6 h-6 mr-2 text-[#475569]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Data Preview
-            </h1>
-            <p class="text-[#64748b] text-sm mt-1 ml-8">Click any cell to edit • Use filters to refine your view • Hover over summary for statistics</p>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-[#1e293b] flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-[#475569]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Data Preview & Cleaning
+                    </h1>
+                    <p class="text-[#64748b] text-sm mt-1 ml-8">Click any cell to edit • Use filters to refine your view • Use cleaning tools to fix data quality issues</p>
+                </div>
+                <button id="toggle-cleaning-tools" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                    </svg>
+                    <span id="tools-btn-text">Show Cleaning Tools</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Advanced Cleaning Tools Panel -->
+        <div id="cleaning-tools-panel" class="mb-5 bg-white border border-[#e2e8f0] rounded-lg shadow-lg hidden">
+            <div class="p-6">
+                <h2 class="text-xl font-semibold text-[#1e293b] mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Advanced Data Cleaning Tools
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Missing Values Imputation -->
+                    <div class="border border-[#e2e8f0] rounded-lg p-4">
+                        <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
+                            <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                            Handle Missing Values
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Column</label>
+                                <select id="impute-column" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="">Select Column</option>
+                                    @foreach($result['columns_list'] as $col)
+                                        <option value="{{ $col }}">{{ $col }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Method</label>
+                                <select id="impute-method" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="mean">Mean (for numeric)</option>
+                                    <option value="median">Median (for numeric)</option>
+                                    <option value="mode">Mode (most frequent)</option>
+                                    <option value="forward_fill">Forward Fill</option>
+                                    <option value="backward_fill">Backward Fill</option>
+                                    <option value="interpolate">Interpolate</option>
+                                    <option value="constant">Constant Value</option>
+                                    <option value="remove_rows">Remove Rows</option>
+                                    <option value="remove_column">Remove Column</option>
+                                </select>
+                            </div>
+                            <div id="impute-value-container" class="hidden">
+                                <label class="block text-sm text-gray-600 mb-1">Constant Value</label>
+                                <input type="text" id="impute-value" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Enter value">
+                            </div>
+                            <button onclick="applyImputation()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                                Apply Imputation
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Outlier Handling -->
+                    <div class="border border-[#e2e8f0] rounded-lg p-4">
+                        <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
+                            <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                            Handle Outliers
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Column</label>
+                                <select id="outlier-column" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="">Select Column</option>
+                                    @foreach($result['columns_list'] as $col)
+                                        @if(($result['column_stats'][$col]['data_type'] ?? '') === 'number' || ($result['column_stats'][$col]['data_type'] ?? '') === 'text-number')
+                                            <option value="{{ $col }}">{{ $col }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Method</label>
+                                <select id="outlier-method" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="remove">Remove Outliers</option>
+                                    <option value="cap">Cap at IQR Bounds</option>
+                                    <option value="winsorize">Winsorize (Percentile Cap)</option>
+                                    <option value="transform_log">Log Transform</option>
+                                    <option value="transform_sqrt">Square Root Transform</option>
+                                </select>
+                            </div>
+                            <div id="winsorize-percentiles" class="hidden space-y-2">
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Lower Percentile</label>
+                                    <input type="number" id="lower-percentile" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value="5" min="0" max="50">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Upper Percentile</label>
+                                    <input type="number" id="upper-percentile" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value="95" min="50" max="100">
+                                </div>
+                            </div>
+                            <button onclick="applyOutlierHandling()" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+                                Apply Outlier Handling
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Duplicate Removal -->
+                    <div class="border border-[#e2e8f0] rounded-lg p-4">
+                        <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
+                            <span class="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                            Remove Duplicates
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Scope</label>
+                                <select id="duplicate-scope" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="all">All Columns (Complete Duplicates)</option>
+                                    <option value="selected">Selected Columns</option>
+                                </select>
+                            </div>
+                            <div id="duplicate-columns-container" class="hidden">
+                                <label class="block text-sm text-gray-600 mb-1">Select Columns</label>
+                                <select id="duplicate-columns" multiple class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" size="4">
+                                    @foreach($result['columns_list'] as $col)
+                                        <option value="{{ $col }}">{{ $col }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Keep</label>
+                                <select id="duplicate-keep" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="first">First Occurrence</option>
+                                    <option value="last">Last Occurrence</option>
+                                </select>
+                            </div>
+                            <button onclick="applyDuplicateRemoval()" class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition text-sm font-semibold">
+                                Remove Duplicates
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Normalization -->
+                    <div class="border border-[#e2e8f0] rounded-lg p-4">
+                        <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
+                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                            Normalize Column
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Column</label>
+                                <select id="normalize-column" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="">Select Column</option>
+                                    @foreach($result['columns_list'] as $col)
+                                        @if(($result['column_stats'][$col]['data_type'] ?? '') === 'number' || ($result['column_stats'][$col]['data_type'] ?? '') === 'text-number')
+                                            <option value="{{ $col }}">{{ $col }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Method</label>
+                                <select id="normalize-method" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="min_max">Min-Max (0-1)</option>
+                                    <option value="z_score">Z-Score (Standardize)</option>
+                                    <option value="robust">Robust (Median & MAD)</option>
+                                </select>
+                            </div>
+                            <button onclick="applyNormalization()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold">
+                                Normalize
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Operations -->
+                    <div class="border border-[#e2e8f0] rounded-lg p-4">
+                        <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
+                            <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                            Bulk Operations
+                        </h3>
+                        <div class="space-y-3">
+                            <button onclick="removeAllEmptyRows()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
+                                Remove All Empty Rows
+                            </button>
+                            <button onclick="removeAllEmptyColumns()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
+                                Remove All Empty Columns
+                            </button>
+                            <button onclick="imputeAllMissing()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
+                                Auto-Impute All Missing (Smart)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Operations History -->
+                    <div class="border border-[#e2e8f0] rounded-lg p-4">
+                        <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
+                            <span class="w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
+                            Recent Operations
+                        </h3>
+                        <div id="operations-history" class="space-y-2 max-h-48 overflow-y-auto text-sm">
+                            <p class="text-gray-500 text-center py-4">No operations yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Excel-like Table Container -->
@@ -361,7 +567,7 @@
     function initVirtualScrolling() {
         tableBody = document.getElementById('table-body');
         const tableContainer = tableBody.closest('.overflow-auto');
-        
+
         if (!tableContainer) return;
 
         // Create spacer elements
@@ -378,14 +584,14 @@
         tableBody.appendChild(bottomSpacer);
 
         scrollContainer = tableContainer;
-        
+
         // Initial render - use filteredData if available, otherwise allData
         const initialData = filteredData !== null ? filteredData : allData;
         renderRows(0, Math.min(endIndex, initialData.length));
-        
+
         // Scroll event listener
         tableContainer.addEventListener('scroll', handleScroll);
-        
+
         // Initial scroll handler
         handleScroll();
     }
@@ -396,10 +602,10 @@
 
         const scrollTop = scrollContainer.scrollTop;
         const containerHeight = scrollContainer.clientHeight;
-        
+
         // Always use filteredData (will be allData when no filters, or filtered results when filters active)
         const dataToRender = filteredData !== null ? filteredData : allData;
-        
+
         // Calculate which rows should be visible
         const newStartIndex = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - BUFFER_ROWS);
         const visibleRows = Math.ceil(containerHeight / ROW_HEIGHT);
@@ -433,7 +639,7 @@
         // Render visible rows
         for (let i = start; i < end; i++) {
             if (i >= dataToRender.length) break;
-            
+
             const row = dataToRender[i];
             // Get original index for cell updates
             const originalIndex = allData.indexOf(row);
@@ -607,11 +813,11 @@
                             buildValueCounts();
                             buildValueOptions();
                             clearFilterCache(); // Clear filter cache since data changed
-                            
+
                             updateOutlierHighlights();
                             updateColumnHeaders();
                             updateSummaryCards(result);
-                            
+
                             populateValueFilters();
                             applyFilters();
 
@@ -653,6 +859,17 @@
         filteredData = getFilteredData(); // This will return allData since no filters are set
         initFilterWorker(); // Initialize Web Worker for large datasets
         initVirtualScrolling();
+
+        // Show cleaning tools if ?clean=true in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('clean') === 'true') {
+            const panel = document.getElementById('cleaning-tools-panel');
+            const btnText = document.getElementById('tools-btn-text');
+            if (panel) {
+                panel.classList.remove('hidden');
+                if (btnText) btnText.textContent = 'Hide Cleaning Tools';
+            }
+        }
     });
 
     function populateValueFilters() {
@@ -673,7 +890,7 @@
 
             // Get all unique values for this column from allData
             const values = Array.from(allValueOptions[col] || []).sort();
-            
+
             if (values.length === 0 && emptyCells === 0) {
                 listContainer.innerHTML = '<div class="p-3 text-center text-slate-500 text-sm font-medium">No values available</div>';
                 valueFilters[col] = new Set();
@@ -823,10 +1040,10 @@
                 activeFilters[column] = filterType;
             }
             clearFilterCache(); // Clear cache when filters change
-            
+
             // Debug logging
             console.log('Filter changed:', { column, filterType, activeFilters, valueFilters });
-            
+
             applyFilters();
         });
     });
@@ -836,19 +1053,19 @@
     let filterCache = null;
     let filterCacheKey = '';
     let allValueOptions = {}; // Cache of all possible values per column
-    
+
     // Ensure allValueOptions is initialized before use
     if (!allValueOptions || Object.keys(allValueOptions).length === 0) {
         allValueOptions = {};
     }
-    
+
     // Pre-compute value options for faster filtering
     function buildValueOptions() {
         allValueOptions = {};
         columnsList.forEach(col => {
             allValueOptions[col] = new Set();
         });
-        
+
         allData.forEach(row => {
             columnsList.forEach(col => {
                 const value = row[col] ?? '';
@@ -859,7 +1076,7 @@
             });
         });
     }
-    
+
     // Get filter cache key for memoization
     function getFilterCacheKey() {
         const activeKeys = Object.keys(activeFilters)
@@ -867,7 +1084,7 @@
             .sort()
             .map(k => `${k}:${activeFilters[k]}`)
             .join('|');
-        
+
         const valueKeys = Object.keys(valueFilters)
             .filter(k => valueFilters[k] && valueFilters[k].size > 0)
             .sort()
@@ -876,15 +1093,15 @@
                 return `${k}:[${vals}]`;
             })
             .join('|');
-        
+
         return `active:${activeKeys}|values:${valueKeys}`;
     }
-    
+
     // Optimized filter function with caching and early exits
     function getFilteredData() {
         // Get cache key first
         const currentCacheKey = getFilterCacheKey();
-        
+
         // Check if we have any active filters
         const hasActiveFilters = Object.keys(activeFilters || {}).some(col => activeFilters[col] && activeFilters[col] !== 'all');
         const hasValueFilters = Object.keys(valueFilters || {}).some(col => {
@@ -901,7 +1118,7 @@
             console.log('No filters active, returning all data');
             return allData;
         }
-        
+
         console.log('Filters active - Active filters:', hasActiveFilters, 'Value filters:', hasValueFilters);
 
         // Check cache
@@ -913,12 +1130,12 @@
         const activeFilterPredicates = [];
         Object.entries(activeFilters).forEach(([column, filterType]) => {
             if (filterType === 'all') return;
-            
+
             activeFilterPredicates.push((row, rowIndex) => {
                 const value = row[column] ?? '';
                 const isEmpty = value === '' || value === null;
                 const isOutlier = outlierMap[rowIndex] && outlierMap[rowIndex][column];
-                
+
                 switch (filterType) {
                     case 'empty':
                         return isEmpty;
@@ -936,15 +1153,15 @@
         const valueFilterPredicates = [];
         Object.entries(valueFilters).forEach(([column, selectedValues]) => {
             if (!selectedValues || selectedValues.size === 0) return;
-            
+
             const totalOptions = allValueOptions[column] ? allValueOptions[column].size : 0;
             // If all values selected, no filtering needed
             if (selectedValues.size >= totalOptions) return;
-            
+
             valueFilterPredicates.push((row) => {
                 const value = row[column] ?? '';
                 const isEmpty = value === '' || value === null;
-                
+
                 if (isEmpty) {
                     return selectedValues.has('__EMPTY__');
                 } else {
@@ -961,7 +1178,7 @@
                     return false;
                 }
             }
-            
+
             // Apply value filters (only if no active filter already rejected)
             if (valueFilterPredicates.length > 0) {
                 for (const predicate of valueFilterPredicates) {
@@ -970,10 +1187,10 @@
                     }
                 }
             }
-            
+
             return true;
         });
-        
+
         filterCacheKey = currentCacheKey;
         return filterCache;
     }
@@ -982,7 +1199,7 @@
     let filterWorker = null;
     let isFiltering = false;
     let filterProgressBar = null;
-    
+
     // Initialize Web Worker if available and dataset is large
     function initFilterWorker() {
         if (typeof Worker !== 'undefined' && allData.length > 10000) {
@@ -992,29 +1209,29 @@
                 filterWorker = new Worker(workerPath);
                 filterWorker.onmessage = function(e) {
                     const { command, filteredData: workerFilteredData, rowCount, processed, total, progress } = e.data;
-                    
+
                     if (command === 'FILTER_PROGRESS') {
                         updateFilterProgress(processed, total, progress);
                     } else if (command === 'FILTER_COMPLETE') {
                         isFiltering = false;
                         hideFilterProgress();
-                        
+
                         // Assign the filtered data from worker
                         filteredData = workerFilteredData;
-                        
+
                         // Reset scroll position and re-render
                         startIndex = 0;
                         endIndex = Math.min(100, filteredData.length);
-                        
+
                         if (scrollContainer) {
                             scrollContainer.scrollTop = 0;
                         }
-                        
+
                         renderRows(startIndex, endIndex);
                         updateFilteredRowCount();
                     }
                 };
-                
+
                 filterWorker.onerror = function(error) {
                     console.error('Filter worker error:', error);
                     // Fallback to regular filtering
@@ -1027,11 +1244,11 @@
             }
         }
     }
-    
+
     // Create filter progress UI
     function createFilterProgressBar() {
         if (filterProgressBar) return;
-        
+
         filterProgressBar = document.createElement('div');
         filterProgressBar.id = 'filter-progress-bar';
         filterProgressBar.className = 'fixed top-0 left-0 right-0 bg-blue-600 text-white text-center py-2 z-50 shadow-lg';
@@ -1047,12 +1264,12 @@
         `;
         document.body.appendChild(filterProgressBar);
     }
-    
+
     function showFilterProgress() {
         if (!filterProgressBar) createFilterProgressBar();
         filterProgressBar.style.display = 'block';
     }
-    
+
     function updateFilterProgress(processed, total, progress) {
         if (!filterProgressBar) return;
         const textEl = document.getElementById('filter-progress-text');
@@ -1060,7 +1277,7 @@
         if (textEl) textEl.textContent = `${progress}% (${processed.toLocaleString()}/${total.toLocaleString()} rows)`;
         if (fillEl) fillEl.style.width = progress + '%';
     }
-    
+
     function hideFilterProgress() {
         if (filterProgressBar) {
             filterProgressBar.style.display = 'none';
@@ -1084,25 +1301,25 @@
                 acc[k] = valueFilters[k] ? Array.from(valueFilters[k]) : [];
                 return acc;
             }, {}));
-            
+
             filteredData = getFilteredData();
-            
+
             // Ensure filteredData is always an array
             if (!Array.isArray(filteredData)) {
                 console.warn('Filtered data is not an array, using allData');
                 filteredData = allData;
             }
-            
+
             console.log('Filtered data length:', filteredData.length, 'from', allData.length);
-            
+
             // Reset scroll position and re-render
             startIndex = 0;
             endIndex = Math.min(100, filteredData.length);
-            
+
             if (scrollContainer) {
                 scrollContainer.scrollTop = 0;
             }
-            
+
             renderRows(startIndex, endIndex);
             updateFilteredRowCount();
         } catch (error) {
@@ -1124,18 +1341,18 @@
         // Clear any pending filter applications
         if (filterTimeout) clearTimeout(filterTimeout);
         if (filterRAF) cancelAnimationFrame(filterRAF);
-        
+
         // Cancel any ongoing worker filtering
         if (filterWorker && isFiltering) {
             filterWorker.terminate();
             initFilterWorker(); // Reinitialize worker
         }
-        
+
         // Use Web Worker for large datasets (> 10000 rows)
         if (filterWorker && allData.length > 10000) {
             isFiltering = true;
             showFilterProgress();
-            
+
             filterTimeout = setTimeout(() => {
                 filterWorker.postMessage({
                     command: 'FILTER',
@@ -1167,13 +1384,13 @@
             }, debounceTime);
         }
     }
-    
+
     // Clear filter cache when data changes
     function clearFilterCache() {
         filterCache = null;
         filterCacheKey = '';
     }
-    
+
     // Update filtered row count in sidebar
     function updateFilteredRowCount() {
         const countEl = document.getElementById('filtered-row-count');
@@ -1245,6 +1462,248 @@
         document.getElementById('sidebar-duplicate-count').textContent = result.total_duplicate_rows;
         const totalEmpty = Object.values(result.column_stats).reduce((sum, stat) => sum + stat.empty_count, 0);
         document.getElementById('sidebar-empty-count').textContent = totalEmpty.toLocaleString();
+    }
+
+    // Cleaning Tools JavaScript
+    let operationsHistory = [];
+
+    // Toggle cleaning tools panel
+    document.getElementById('toggle-cleaning-tools').addEventListener('click', function() {
+        const panel = document.getElementById('cleaning-tools-panel');
+        const btnText = document.getElementById('tools-btn-text');
+        panel.classList.toggle('hidden');
+        btnText.textContent = panel.classList.contains('hidden') ? 'Show Cleaning Tools' : 'Hide Cleaning Tools';
+    });
+
+    // Show/hide impute value input
+    document.getElementById('impute-method').addEventListener('change', function() {
+        const container = document.getElementById('impute-value-container');
+        container.classList.toggle('hidden', this.value !== 'constant');
+    });
+
+    // Show/hide winsorize percentiles
+    document.getElementById('outlier-method').addEventListener('change', function() {
+        const container = document.getElementById('winsorize-percentiles');
+        container.classList.toggle('hidden', this.value !== 'winsorize');
+    });
+
+    // Show/hide duplicate columns selector
+    document.getElementById('duplicate-scope').addEventListener('change', function() {
+        const container = document.getElementById('duplicate-columns-container');
+        container.classList.toggle('hidden', this.value !== 'selected');
+    });
+
+    // Apply cleaning operation
+    async function applyCleaningOperation(operations) {
+        try {
+            const response = await fetch(`/api/file/${FILE_ID}/clean`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ operations })
+            });
+
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Reload page to show updated data
+                window.location.reload();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Cleaning failed:', error);
+            alert('Failed to apply cleaning operation. Please try again.');
+        }
+    }
+
+    // Add to operations history
+    function addToHistory(operation) {
+        operationsHistory.unshift(operation);
+        const historyEl = document.getElementById('operations-history');
+        if (operationsHistory.length === 1) {
+            historyEl.innerHTML = '';
+        }
+        const item = document.createElement('div');
+        item.className = 'p-2 bg-gray-50 rounded text-xs';
+        item.textContent = `${new Date().toLocaleTimeString()} - ${operation}`;
+        historyEl.insertBefore(item, historyEl.firstChild);
+
+        // Keep only last 10 operations
+        if (operationsHistory.length > 10) {
+            operationsHistory.pop();
+            if (historyEl.lastChild) historyEl.removeChild(historyEl.lastChild);
+        }
+    }
+
+    // Imputation
+    function applyImputation() {
+        const column = document.getElementById('impute-column').value;
+        const method = document.getElementById('impute-method').value;
+        const value = document.getElementById('impute-value').value;
+
+        if (!column) {
+            alert('Please select a column');
+            return;
+        }
+
+        if (method === 'constant' && !value) {
+            alert('Please enter a constant value');
+            return;
+        }
+
+        const operation = {
+            type: 'impute_missing',
+            column: column,
+            method: method
+        };
+
+        if (method === 'constant') {
+            operation.value = value;
+        }
+
+        addToHistory(`Imputed ${column} using ${method}`);
+        applyCleaningOperation([operation]);
+    }
+
+    // Outlier handling
+    function applyOutlierHandling() {
+        const column = document.getElementById('outlier-column').value;
+        const method = document.getElementById('outlier-method').value;
+        const lowerPercentile = document.getElementById('lower-percentile')?.value;
+        const upperPercentile = document.getElementById('upper-percentile')?.value;
+
+        if (!column) {
+            alert('Please select a column');
+            return;
+        }
+
+        const operation = {
+            type: 'handle_outliers',
+            column: column,
+            method: method
+        };
+
+        if (method === 'winsorize' && lowerPercentile && upperPercentile) {
+            operation.lower_percentile = parseFloat(lowerPercentile);
+            operation.upper_percentile = parseFloat(upperPercentile);
+        }
+
+        addToHistory(`Handled outliers in ${column} using ${method}`);
+        applyCleaningOperation([operation]);
+    }
+
+    // Duplicate removal
+    function applyDuplicateRemoval() {
+        const scope = document.getElementById('duplicate-scope').value;
+        const keep = document.getElementById('duplicate-keep').value;
+        const columnsSelect = document.getElementById('duplicate-columns');
+
+        let columns = null;
+        if (scope === 'selected') {
+            columns = Array.from(columnsSelect.selectedOptions).map(opt => opt.value);
+            if (columns.length === 0) {
+                alert('Please select at least one column');
+                return;
+            }
+        }
+
+        const operation = {
+            type: 'remove_duplicates',
+            method: keep,
+            columns: columns
+        };
+
+        addToHistory(`Removed duplicates (${scope === 'all' ? 'all columns' : columns.length + ' columns'})`);
+        applyCleaningOperation([operation]);
+    }
+
+    // Normalization
+    function applyNormalization() {
+        const column = document.getElementById('normalize-column').value;
+        const method = document.getElementById('normalize-method').value;
+
+        if (!column) {
+            alert('Please select a column');
+            return;
+        }
+
+        const operation = {
+            type: method === 'z_score' ? 'standardize' : 'normalize',
+            column: column,
+            method: method
+        };
+
+        addToHistory(`Normalized ${column} using ${method}`);
+        applyCleaningOperation([operation]);
+    }
+
+    // Bulk operations
+    function removeAllEmptyRows() {
+        if (!confirm('This will remove all rows that have any empty cells. Continue?')) return;
+
+        const operations = columnsList.map(col => ({
+            type: 'remove_rows_with_missing',
+            column: col
+        }));
+
+        addToHistory('Removed all rows with empty cells');
+        applyCleaningOperation(operations);
+    }
+
+    function removeAllEmptyColumns() {
+        if (!confirm('This will remove all columns that are completely empty. Continue?')) return;
+
+        const operations = columnsList
+            .filter(col => {
+                const stats = columnStats[col];
+                return stats && stats.empty_count === allData.length;
+            })
+            .map(col => ({
+                type: 'remove_column',
+                column: col
+            }));
+
+        if (operations.length === 0) {
+            alert('No completely empty columns found');
+            return;
+        }
+
+        addToHistory(`Removed ${operations.length} empty column(s)`);
+        applyCleaningOperation(operations);
+    }
+
+    function imputeAllMissing() {
+        if (!confirm('This will automatically impute all missing values using smart methods (mean for numeric, mode for text). Continue?')) return;
+
+        const operations = [];
+        columnsList.forEach(col => {
+            const stats = columnStats[col];
+            if (stats && stats.empty_count > 0) {
+                let method = 'mean';
+                if (stats.data_type === 'text') {
+                    method = 'mode';
+                } else if (stats.data_type === 'text-number') {
+                    method = 'median';
+                }
+                operations.push({
+                    type: 'impute_missing',
+                    column: col,
+                    method: method
+                });
+            }
+        });
+
+        if (operations.length === 0) {
+            alert('No missing values found');
+            return;
+        }
+
+        addToHistory(`Auto-imputed missing values in ${operations.length} column(s)`);
+        applyCleaningOperation(operations);
     }
 </script>
 

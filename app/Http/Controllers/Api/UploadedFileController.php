@@ -51,6 +51,17 @@ class UploadedFileController extends Controller
             $request->file('file')
         );
 
+        // Auto-check quality after upload
+        $qualityResult = null;
+        try {
+            $qualityResult = $this->pythonService->process('quality_check.py', [
+                'file_type' => $uploadedFile->file_type,
+                'file_path' => storage_path("app/public/{$uploadedFile->file_path}")
+            ]);
+        } catch (\Exception $e) {
+            // Quality check failed, but upload succeeded
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -61,6 +72,7 @@ class UploadedFileController extends Controller
                 'mime_type' => $uploadedFile->mime_type,
                 'file_size' => $uploadedFile->file_size,
             ],
+            'quality_check' => $qualityResult,
             'message' => 'File uploaded successfully',
         ]);
     }
@@ -126,6 +138,96 @@ class UploadedFileController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete file: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function qualityCheck(int $id): JsonResponse
+    {
+        try {
+            $file = $this->fileService->find($id);
+
+            if (!$file) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File not found'
+                ], 404);
+            }
+
+            $result = $this->pythonService->process('quality_check.py', [
+                'file_type' => $file->file_type,
+                'file_path' => storage_path("app/public/{$file->file_path}")
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'quality_score' => $result['quality_score'],
+                'is_clean' => $result['is_clean'],
+                'total_rows' => $result['total_rows'],
+                'total_columns' => $result['total_columns'],
+                'total_missing' => $result['total_missing'],
+                'total_duplicate_rows' => $result['total_duplicate_rows'],
+                'total_outliers' => $result['total_outliers'],
+                'issues' => $result['issues'],
+                'issues_by_type' => $result['issues_by_type'],
+                'column_quality' => $result['column_quality']
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check file quality: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function cleanData(Request $request, int $id): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'operations' => 'required|array',
+            'operations.*.type' => 'required|string',
+            'operations.*.method' => 'nullable|string',
+            'operations.*.column' => 'nullable|string',
+            'operations.*.columns' => 'nullable|array',
+            'operations.*.value' => 'nullable',
+            'operations.*.lower_percentile' => 'nullable|numeric',
+            'operations.*.upper_percentile' => 'nullable|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $file = $this->fileService->find($id);
+
+            if (!$file) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File not found'
+                ], 404);
+            }
+
+            $result = $this->pythonService->process('clean_data.py', [
+                'file_type' => $file->file_type,
+                'file_path' => storage_path("app/public/{$file->file_path}"),
+                'operations' => $request->input('operations')
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'] ?? 'Data cleaned successfully',
+                'original_rows' => $result['original_rows'],
+                'cleaned_rows' => $result['cleaned_rows'],
+                'rows_removed' => $result['rows_removed'],
+                'applied_operations' => $result['applied_operations']
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }

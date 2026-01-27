@@ -19,6 +19,59 @@ class UploadedFileController extends Controller
         private PythonProcessingService $pythonService
     ) {}
 
+    public function dashboard(): Factory|View
+    {
+        $userId = (int) Auth::id();
+
+        $totalFiles = UploadedFile::where('user_id', $userId)->count();
+        $totalSizeBytes = UploadedFile::where('user_id', $userId)->sum('file_size');
+
+        $recentFiles = UploadedFile::where('user_id', $userId)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $qualitySummaries = [];
+        $qualityScores = [];
+
+        foreach ($recentFiles as $file) {
+            try {
+                $qualityResult = $this->pythonService->process('quality_check.py', [
+                    'file_type' => $file->file_type,
+                    'file_path' => storage_path("app/public/{$file->file_path}")
+                ]);
+
+                $score = $qualityResult['quality_score'] ?? null;
+                $qualitySummaries[$file->id] = [
+                    'score' => $score,
+                    'is_clean' => $qualityResult['is_clean'] ?? null,
+                ];
+
+                if ($score !== null) {
+                    $qualityScores[] = $score;
+                }
+            } catch (\Throwable $e) {
+                $qualitySummaries[$file->id] = [
+                    'score' => null,
+                    'is_clean' => null,
+                ];
+            }
+        }
+
+        $averageQuality = null;
+        if (count($qualityScores) > 0) {
+            $averageQuality = round(array_sum($qualityScores) / count($qualityScores));
+        }
+
+        return view('files.dashboard', [
+            'totalFiles' => $totalFiles,
+            'totalSizeBytes' => $totalSizeBytes,
+            'recentFiles' => $recentFiles,
+            'qualitySummaries' => $qualitySummaries,
+            'averageQuality' => $averageQuality,
+        ]);
+    }
+
     public function index(): Factory|View
     {
         $files = UploadedFile::where('user_id', Auth::id())

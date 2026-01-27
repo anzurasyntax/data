@@ -38,7 +38,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('files.index');
+        return redirect()->route('files.upload');
     }
 
     public function login(Request $request): RedirectResponse
@@ -58,7 +58,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->route('files.index');
+        return redirect()->route('files.upload');
     }
 
     public function logout(Request $request): RedirectResponse

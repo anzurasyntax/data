@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return Auth::check()
-        ? redirect()->route('files.upload')
+        ? redirect()->route('dashboard')
         : redirect()->route('auth.login');
 })->name('home');
 
@@ -24,6 +24,8 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('auth.logout');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [UploadedFileController::class, 'dashboard'])->name('dashboard');
+
     // Upload page (also shows user's uploaded files)
     Route::get('/files', [UploadedFileController::class, 'index'])->name('files.upload');
     Route::post('/files', [UploadedFileController::class, 'store'])->name('files.store');

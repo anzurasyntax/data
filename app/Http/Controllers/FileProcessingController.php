@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FileProcessingController extends Controller
 {
@@ -20,14 +21,16 @@ class FileProcessingController extends Controller
 
     public function index(): Factory|View
     {
-        $files = UploadedFile::all();
+        $files = UploadedFile::where('user_id', Auth::id())
+            ->latest()
+            ->get();
         return view('files.index', compact('files'));
     }
 
     public function show($id): View|Factory|RedirectResponse
     {
         try {
-            $file = $this->fileService->find($id);
+            $file = $this->fileService->findForUser($id, (int) Auth::id());
 
             $result = $this->pythonService->process('process_file.py', [
                 'file_type' => $file->file_type,
@@ -50,7 +53,7 @@ class FileProcessingController extends Controller
         ]);
 
         try {
-            $file = $this->fileService->find($id);
+            $file = $this->fileService->findForUser($id, (int) Auth::id());
 
             $result = $this->pythonService->process('update_cell.py', [
                 'file_type' => $file->file_type,
@@ -90,7 +93,7 @@ class FileProcessingController extends Controller
         ]);
 
         try {
-            $file = $this->fileService->find($id);
+            $file = $this->fileService->findForUser($id, (int) Auth::id());
 
             $result = $this->pythonService->process('clean_data.py', [
                 'file_type' => $file->file_type,
@@ -117,7 +120,7 @@ class FileProcessingController extends Controller
     public function qualityCheck($id): JsonResponse
     {
         try {
-            $file = $this->fileService->find($id);
+            $file = $this->fileService->findForUser($id, (int) Auth::id());
 
             $result = $this->pythonService->process('quality_check.py', [
                 'file_type' => $file->file_type,

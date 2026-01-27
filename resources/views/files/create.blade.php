@@ -9,7 +9,18 @@
 <body class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 to-slate-800">
 
 <div class="w-full max-w-lg bg-white/10 backdrop-blur-lg shadow-2xl rounded-2xl p-8 border border-white/20">
-    <h2 class="text-3xl font-bold text-white text-center mb-6">Upload Your Data File</h2>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-3xl font-bold text-white">Upload Your Data File</h2>
+            <p class="text-slate-200 text-sm mt-1">Signed in as {{ auth()->user()->email }}</p>
+        </div>
+        <form action="{{ route('auth.logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="text-slate-200 hover:text-white underline font-semibold text-sm">
+                Logout
+            </button>
+        </form>
+    </div>
 
     <form action="{{ route('files.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
         @csrf
@@ -36,6 +47,12 @@
             Upload File
         </button>
     </form>
+
+    <div class="mt-6 text-center">
+        <a href="{{ route('process.index') }}" class="text-blue-200 hover:text-white underline font-semibold">
+            View my uploaded files
+        </a>
+    </div>
 </div>
 
 </body>

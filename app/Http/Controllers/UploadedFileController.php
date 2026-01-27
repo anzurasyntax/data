@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UploadedFileController extends Controller
 {
@@ -20,13 +21,15 @@ class UploadedFileController extends Controller
 
     public function index(): Factory|View
     {
-        $files = UploadedFile::all();
+        $files = UploadedFile::where('user_id', Auth::id())
+            ->latest()
+            ->get();
         return view('files.create', compact('files'));
     }
 
     public function store(StoreUploadedFileRequest $request): RedirectResponse
     {
-        $file = $this->service->store($request->file_type, $request->file('file'));
+        $file = $this->service->store($request->file_type, $request->file('file'), (int) Auth::id());
         try {
             $qualityResult = $this->pythonService->process('quality_check.py', [
                 'file_type' => $file->file_type,
@@ -43,7 +46,7 @@ class UploadedFileController extends Controller
     public function quality($id): Factory|View|RedirectResponse
     {
         try {
-            $file = $this->service->find($id);
+            $file = $this->service->findForUser($id, (int) Auth::id());
 
             $qualityResult = session('quality_result');
             if (!$qualityResult) {
@@ -58,7 +61,7 @@ class UploadedFileController extends Controller
 
             return view('files.quality', compact('file', 'qualityResult'));
         } catch (\Exception $e) {
-            $file = $this->service->find($id);
+            $file = $this->service->findForUser($id, (int) Auth::id());
             $errorMessage = 'Failed to check file quality: ' . $e->getMessage();
 
 
@@ -73,7 +76,7 @@ class UploadedFileController extends Controller
     public function destroy($id): RedirectResponse
     {
         try {
-            $file = $this->service->find($id);
+            $file = $this->service->findForUser($id, (int) Auth::id());
             $filePath = storage_path("app/public/{$file->file_path}");
             if (file_exists($filePath)) {
                 unlink($filePath);

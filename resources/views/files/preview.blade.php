@@ -1363,10 +1363,11 @@
 
     async function applyCleaningOperation(operations) {
         try {
-            const response = await fetch(`/api/file/${FILE_ID}/clean`, {
+            const response = await fetch(`/files/${FILE_ID}/clean`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({ operations })

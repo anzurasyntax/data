@@ -6,13 +6,52 @@ import numpy as np
 
 def to_native(obj):
     """Convert numpy/pandas types to native Python types for JSON serialization."""
-    if isinstance(obj, (np.integer,)):
+    # Handle None first
+    if obj is None:
+        return None
+    
+    # Handle numpy types (NumPy 2.0 compatible - removed np.int_ and np.float_)
+    if isinstance(obj, (np.integer, np.intc, np.intp, np.int8, np.int16, np.int32, np.int64)):
         return int(obj)
-    if isinstance(obj, (np.floating,)):
+    if isinstance(obj, (np.floating, np.float16, np.float32, np.float64)):
         return float(obj)
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
+    
+    # Handle pandas types
+    if isinstance(obj, (np.ndarray,)):
+        return obj.tolist()
+    if isinstance(obj, (pd.Series,)):
+        return obj.tolist()
+    if isinstance(obj, (pd.Index,)):
+        return obj.tolist()
     if isinstance(obj, (pd.Timestamp,)):
         return obj.strftime("%Y-%m-%d %H:%M:%S")
-    return obj
+    
+    # Check for NaN/NA values (handles pd.NA, np.nan, None, etc.)
+    try:
+        if pd.isna(obj):
+            return None
+    except (TypeError, ValueError, AttributeError):
+        pass
+    
+    # Handle collections
+    if isinstance(obj, dict):
+        return {str(key): to_native(value) for key, value in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [to_native(item) for item in obj]
+    if isinstance(obj, set):
+        return [to_native(item) for item in obj]
+    
+    # Handle basic Python types that are JSON-serializable
+    if isinstance(obj, (str, int, float, bool)):
+        return obj
+    
+    # For any other type, try to convert to string as last resort
+    try:
+        return str(obj)
+    except:
+        return None
 
 def load_file(file_path, file_type):
     """Load file based on type with proper error handling."""
@@ -35,7 +74,7 @@ def load_file(file_path, file_type):
                 try:
                     df = pd.read_csv(file_path, sep='\t')
                 except:
-                    df = pd.read_csv(file_path, sep='\s+')
+                    df = pd.read_csv(file_path, sep=r'\s+', engine='python')
         elif file_type == 'xml':
             df = pd.read_xml(file_path)
         elif file_type == 'xlsx':
@@ -81,8 +120,11 @@ def calculate_quality_metrics(df):
     for col in df.columns:
         col_data = df[col]
         
-        # Missing values
-        missing_count = col_data.isna().sum() + (col_data.astype(str) == '').sum()
+        # Missing values (including NaN, empty strings, and whitespace-only strings)
+        # Convert to string and check for empty or whitespace-only values
+        str_col = col_data.astype(str)
+        # str_col.str.strip() == '' catches both empty strings and whitespace-only strings
+        missing_count = col_data.isna().sum() + (str_col.str.strip() == '').sum()
         missing_pct = (missing_count / total_rows) * 100 if total_rows > 0 else 0
         total_missing += missing_count
         
@@ -120,7 +162,7 @@ def calculate_quality_metrics(df):
                     lower = q1 - 1.5 * iqr
                     upper = q3 + 1.5 * iqr
                     outlier_mask = (numeric_values < lower) | (numeric_values > upper)
-                    outlier_indexes = outlier_mask[outlier_mask].index.tolist()
+                    outlier_indexes = [int(idx) for idx in outlier_mask[outlier_mask].index.tolist()]
                     outlier_count = len(outlier_indexes)
                     total_outliers += outlier_count
                 
@@ -236,6 +278,9 @@ def calculate_quality_metrics(df):
 
 def main():
     try:
+        if len(sys.argv) < 2:
+            raise ValueError("Missing required argument: JSON payload")
+        
         payload = json.loads(sys.argv[1])
         file_path = payload.get("file_path")
         file_type = payload.get("file_type")
@@ -254,8 +299,26 @@ def main():
             **quality_metrics
         }
         
-        print(json.dumps(result, default=to_native))
+        # Recursively convert all pandas/numpy objects to native types
+        # This should eliminate any circular references
+        result = to_native(result)
         
+        # Serialize to JSON
+        # Use default=to_native as fallback for any remaining non-serializable objects
+        json_output = json.dumps(result, default=to_native, ensure_ascii=False)
+        
+        print(json_output)
+        sys.stdout.flush()  # Ensure output is flushed
+        
+    except json.JSONDecodeError as e:
+        error_result = {
+            "success": False,
+            "error": f"Invalid JSON payload: {str(e)}",
+            "error_type": "JSONDecodeError"
+        }
+        print(json.dumps(error_result))
+        sys.stdout.flush()
+        sys.exit(1)
     except Exception as e:
         error_result = {
             "success": False,
@@ -263,6 +326,7 @@ def main():
             "error_type": type(e).__name__
         }
         print(json.dumps(error_result))
+        sys.stdout.flush()
         sys.exit(1)
 
 if __name__ == "__main__":

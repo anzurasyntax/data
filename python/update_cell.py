@@ -38,7 +38,7 @@ def load_file(file_path, file_type):
                 try:
                     df = pd.read_csv(file_path, sep='\t')
                 except:
-                    df = pd.read_csv(file_path, sep='\s+')
+                    df = pd.read_csv(file_path, sep=r'\s+', engine='python')
         elif file_type == 'xml':
             df = pd.read_xml(file_path)
         elif file_type == 'xlsx':
@@ -87,8 +87,12 @@ def calculate_column_stats(df, col):
     """Calculate statistics for a column."""
     col_data = df[col]
     
-    empty_count = col_data.isna().sum() + (col_data.astype(str) == '').sum()
-    actual_non_empty = col_data.replace('', np.nan).dropna()
+    # Count missing values (NaN, empty strings, and whitespace-only strings)
+    str_col = col_data.astype(str)
+    # str_col.str.strip() == '' catches both empty strings and whitespace-only strings
+    empty_count = col_data.isna().sum() + (str_col.str.strip() == '').sum()
+    # Replace empty/whitespace strings with NaN for processing
+    actual_non_empty = col_data.replace('', np.nan).replace(r'^\s+$', np.nan, regex=True).dropna()
     
     numeric_values = pd.to_numeric(col_data, errors='coerce')
     non_null_numeric = numeric_values.dropna()

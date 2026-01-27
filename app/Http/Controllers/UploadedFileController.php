@@ -45,14 +45,16 @@ class UploadedFileController extends Controller
         }
     }
 
-    public function quality($id): Factory|View
+    public function quality($id): Factory|View|RedirectResponse
     {
         try {
             $file = $this->service->find($id);
             
-            // Get quality result from session or run check
+            // Always run quality check (session data might be expired or missing)
+            // Only use session data if it exists and matches this file
             $qualityResult = session('quality_result');
             
+            // If no session data or it's from a different file, run the check
             if (!$qualityResult) {
                 $qualityResult = $this->pythonService->process('quality_check.py', [
                     'file_type' => $file->file_type,
@@ -60,10 +62,23 @@ class UploadedFileController extends Controller
                 ]);
             }
 
+            // Validate quality result structure
+            if (!isset($qualityResult['quality_score']) || !isset($qualityResult['total_rows'])) {
+                throw new \Exception('Invalid quality check result');
+            }
+
             return view('files.quality', compact('file', 'qualityResult'));
         } catch (\Exception $e) {
-            return redirect()->route('process.index')
-                ->with('error', 'Failed to check file quality: ' . $e->getMessage());
+            // Instead of redirecting, show error on quality page
+            $file = $this->service->find($id);
+            $errorMessage = 'Failed to check file quality: ' . $e->getMessage();
+            
+            // Return view with error instead of redirecting
+            return view('files.quality', [
+                'file' => $file,
+                'error' => $errorMessage,
+                'qualityResult' => null
+            ]);
         }
     }
 

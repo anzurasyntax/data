@@ -35,7 +35,7 @@ def load_file(file_path, file_type):
                 try:
                     df = pd.read_csv(file_path, sep='\t')
                 except:
-                    df = pd.read_csv(file_path, sep='\s+')
+                    df = pd.read_csv(file_path, sep=r'\s+', engine='python')
         elif file_type == 'xml':
             df = pd.read_xml(file_path)
         elif file_type == 'xlsx':
@@ -85,7 +85,10 @@ def impute_missing_values(df, column, method, value=None):
         raise ValueError(f"Column '{column}' does not exist")
     
     col_data = df[column].copy()
-    missing_mask = col_data.isna() | (col_data.astype(str) == '')
+    str_col = col_data.astype(str)
+    # Include NaN, empty strings, and whitespace-only strings as missing
+    # str_col.str.strip() == '' catches both empty strings and whitespace-only strings
+    missing_mask = col_data.isna() | (str_col.str.strip() == '')
     
     if not missing_mask.any():
         return df  # No missing values
@@ -300,10 +303,23 @@ def main():
             
             elif op_type == "remove_rows_with_missing":
                 if op_column:
-                    df = df.dropna(subset=[op_column])
-                    df = df[df[op_column].astype(str) != '']
+                    # Remove rows with NaN, empty strings, or whitespace-only strings in the column
+                    str_col = df[op_column].astype(str)
+                    # str_col.str.strip() == '' catches both empty strings and whitespace-only strings
+                    mask = ~(df[op_column].isna() | (str_col.str.strip() == ''))
+                    df = df[mask]
                 else:
+                    # Remove rows with any missing values (NaN, empty, or whitespace-only in any column)
+                    # First remove NaN rows
                     df = df.dropna()
+                    # Then remove rows where any column is empty or whitespace-only
+                    mask = pd.Series([True] * len(df), index=df.index)
+                    for col in df.columns:
+                        str_col = df[col].astype(str)
+                        # Keep rows where column is not empty/whitespace-only
+                        col_mask = (str_col.str.strip() != '')
+                        mask = mask & col_mask
+                    df = df[mask]
                 applied_operations.append({
                     "type": "remove_rows_with_missing",
                     "column": op_column,

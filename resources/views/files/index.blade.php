@@ -33,15 +33,22 @@
                 <td class="border px-4 py-2 text-center">{{ number_format($file->file_size / 1024, 2) }} KB</td>
                 <td class="border px-4 py-2 text-center">{{ $file->created_at->format('Y-m-d H:i') }}</td>
                 <td class="border px-4 py-2 text-center">
-                    <form action="{{ route('files.destroy', $file->id) }}" method="POST" 
-                          onsubmit="return confirm('Are you sure you want to delete this file?');" 
-                          class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-600 hover:text-red-800 underline text-sm">
-                            Delete
-                        </button>
-                    </form>
+                    <div class="flex items-center justify-center gap-3">
+                        <a href="{{ route('files.quality', $file->id) }}" 
+                           class="text-blue-600 hover:text-blue-800 underline text-sm">
+                            Quality
+                        </a>
+                        <span class="text-gray-300">|</span>
+                        <form action="{{ route('files.destroy', $file->id) }}" method="POST" 
+                              onsubmit="return confirm('Are you sure you want to delete this file?');" 
+                              class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-600 hover:text-red-800 underline text-sm">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
         @empty

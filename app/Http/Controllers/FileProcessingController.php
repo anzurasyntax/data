@@ -27,10 +27,10 @@ class FileProcessingController extends Controller
         return view('files.index', compact('files'));
     }
 
-    public function show($id): View|Factory|RedirectResponse
+    public function show(string $slug): View|Factory|RedirectResponse
     {
         try {
-            $file = $this->fileService->findForUser($id, (int) Auth::id());
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
 
             $result = $this->pythonService->process('process_file.py', [
                 'file_type' => $file->file_type,
@@ -39,12 +39,12 @@ class FileProcessingController extends Controller
 
             return view('files.preview', compact('file', 'result'));
         } catch (\Exception $e) {
-            return redirect()->route('process.index')
+            return redirect()->route('files.list')
                 ->with('error', 'Failed to process file: ' . $e->getMessage());
         }
     }
 
-    public function updateCell(Request $request, $id): JsonResponse
+    public function updateCell(Request $request, string $slug): JsonResponse
     {
         $validated = $request->validate([
             'row_index' => 'required|integer|min:0',
@@ -53,7 +53,7 @@ class FileProcessingController extends Controller
         ]);
 
         try {
-            $file = $this->fileService->findForUser($id, (int) Auth::id());
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
 
             $result = $this->pythonService->process('update_cell.py', [
                 'file_type' => $file->file_type,
@@ -79,7 +79,7 @@ class FileProcessingController extends Controller
         }
     }
 
-    public function cleanData(Request $request, $id): JsonResponse
+    public function cleanData(Request $request, string $slug): JsonResponse
     {
         $validated = $request->validate([
             'operations' => 'required|array',
@@ -93,7 +93,7 @@ class FileProcessingController extends Controller
         ]);
 
         try {
-            $file = $this->fileService->findForUser($id, (int) Auth::id());
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
 
             $result = $this->pythonService->process('clean_data.py', [
                 'file_type' => $file->file_type,
@@ -117,10 +117,10 @@ class FileProcessingController extends Controller
         }
     }
 
-    public function qualityCheck($id): JsonResponse
+    public function qualityCheck(string $slug): JsonResponse
     {
         try {
-            $file = $this->fileService->findForUser($id, (int) Auth::id());
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
 
             $result = $this->pythonService->process('quality_check.py', [
                 'file_type' => $file->file_type,

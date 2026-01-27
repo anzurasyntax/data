@@ -494,7 +494,7 @@
 </div>
 
 <script>
-    const FILE_ID = {{ $file->id }};
+    const FILE_SLUG = @json($file->slug);
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 
     const allData = @json($result['data']);
@@ -694,7 +694,7 @@
                     input.disabled = true;
 
                     try {
-                        const response = await fetch(`/files/${FILE_ID}/cell`, {
+                        const response = await fetch(`/files/${FILE_SLUG}/cell`, {
                             method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1363,7 +1363,7 @@
 
     async function applyCleaningOperation(operations) {
         try {
-            const response = await fetch(`/files/${FILE_ID}/clean`, {
+            const response = await fetch(`/files/${FILE_SLUG}/clean`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

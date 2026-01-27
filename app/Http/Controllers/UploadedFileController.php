@@ -35,18 +35,18 @@ class UploadedFileController extends Controller
                 'file_type' => $file->file_type,
                 'file_path' => storage_path("app/public/{$file->file_path}")
             ]);
-            return redirect()->route('files.quality', $file->id)
+            return redirect()->route('files.quality', $file)
                 ->with('quality_result', $qualityResult);
         } catch (\Exception $e) {
-            return redirect()->route('process.index')
+            return redirect()->route('files.list')
                 ->with('warning', 'File uploaded but quality check failed: ' . $e->getMessage());
         }
     }
 
-    public function quality($id): Factory|View|RedirectResponse
+    public function quality(string $slug): Factory|View|RedirectResponse
     {
         try {
-            $file = $this->service->findForUser($id, (int) Auth::id());
+            $file = $this->service->findForUserBySlug($slug, (int) Auth::id());
 
             $qualityResult = session('quality_result');
             if (!$qualityResult) {
@@ -61,7 +61,7 @@ class UploadedFileController extends Controller
 
             return view('files.quality', compact('file', 'qualityResult'));
         } catch (\Exception $e) {
-            $file = $this->service->findForUser($id, (int) Auth::id());
+            $file = $this->service->findForUserBySlug($slug, (int) Auth::id());
             $errorMessage = 'Failed to check file quality: ' . $e->getMessage();
 
 
@@ -73,10 +73,10 @@ class UploadedFileController extends Controller
         }
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy(string $slug): RedirectResponse
     {
         try {
-            $file = $this->service->findForUser($id, (int) Auth::id());
+            $file = $this->service->findForUserBySlug($slug, (int) Auth::id());
             $filePath = storage_path("app/public/{$file->file_path}");
             if (file_exists($filePath)) {
                 unlink($filePath);
@@ -84,10 +84,10 @@ class UploadedFileController extends Controller
 
             $file->delete();
 
-            return redirect()->route('files.index')
+            return redirect()->route('files.upload')
                 ->with('success', 'File deleted successfully');
         } catch (\Exception $e) {
-            return redirect()->route('files.index')
+            return redirect()->route('files.upload')
                 ->with('error', 'Failed to delete file: ' . $e->getMessage());
         }
     }

@@ -49,7 +49,7 @@
     </form>
 
     <div class="mt-6 text-center">
-        <a href="{{ route('process.index') }}" class="text-blue-200 hover:text-white underline font-semibold">
+        <a href="{{ route('files.list') }}" class="text-blue-200 hover:text-white underline font-semibold">
             View my uploaded files
         </a>
     </div>

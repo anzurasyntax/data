@@ -16,7 +16,7 @@
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">Data Quality Report</h1>
                 <p class="text-gray-600">{{ $file->original_name }} ({{ strtoupper($file->file_type) }})</p>
             </div>
-            <a href="{{ route('process.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
+            <a href="{{ route('files.list') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
                 Back to Files
             </a>
         </div>
@@ -45,7 +45,7 @@
     <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div class="text-center py-8">
             <p class="text-gray-600 mb-4">Unable to load quality report. Please try again.</p>
-            <a href="{{ route('files.quality', $file->id) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <a href="{{ route('files.quality', $file->slug) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                 Retry Quality Check
             </a>
         </div>
@@ -194,11 +194,11 @@
                 <p class="text-gray-600">Use our advanced cleaning tools to fix all data quality issues in real-time.</p>
             </div>
             <div class="flex gap-4">
-                <a href="{{ route('process.show', $file->id) }}" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition font-semibold">
+                <a href="{{ route('files.preview', $file->slug) }}" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition font-semibold">
                     View Data
                 </a>
                 @if(!$qualityResult['is_clean'])
-                    <a href="{{ route('process.show', $file->id) }}?clean=true" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold shadow-lg">
+                    <a href="{{ route('files.preview', $file->slug) }}?clean=true" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold shadow-lg">
                         🧹 Clean the Data
                     </a>
                 @endif

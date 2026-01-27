@@ -24,7 +24,7 @@
             <tr class="hover:bg-gray-50">
                 <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
                 <td class="border px-4 py-2">
-                    <a href="{{ route('process.show', $file->id) }}" class="text-blue-600 underline">
+                    <a href="{{ route('files.preview', $file->slug) }}" class="text-blue-600 underline">
                         {{ $file->original_name }}
                     </a>
                 </td>
@@ -34,12 +34,12 @@
                 <td class="border px-4 py-2 text-center">{{ $file->created_at->format('Y-m-d H:i') }}</td>
                 <td class="border px-4 py-2 text-center">
                     <div class="flex items-center justify-center gap-3">
-                        <a href="{{ route('files.quality', $file->id) }}" 
+                        <a href="{{ route('files.quality', $file->slug) }}" 
                            class="text-blue-600 hover:text-blue-800 underline text-sm">
                             Quality
                         </a>
                         <span class="text-gray-300">|</span>
-                        <form action="{{ route('files.destroy', $file->id) }}" method="POST" 
+                        <form action="{{ route('files.delete', $file->slug) }}" method="POST" 
                               onsubmit="return confirm('Are you sure you want to delete this file?');" 
                               class="inline">
                             @csrf

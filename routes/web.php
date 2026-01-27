@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return Auth::check()
-        ? redirect()->route('files.index')
+        ? redirect()->route('files.upload')
         : redirect()->route('auth.login');
 })->name('home');
 
@@ -24,12 +24,18 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('auth.logout');
 
 Route::middleware('auth')->group(function () {
-    Route::resource('files', UploadedFileController::class)->only(['index', 'store', 'destroy']);
-    Route::get('/files/{id}/quality', [UploadedFileController::class, 'quality'])->name('files.quality');
+    // Upload page (also shows user's uploaded files)
+    Route::get('/files', [UploadedFileController::class, 'index'])->name('files.upload');
+    Route::post('/files', [UploadedFileController::class, 'store'])->name('files.store');
+    Route::delete('/files/{slug}', [UploadedFileController::class, 'destroy'])->name('files.delete');
+    Route::get('/files/{slug}/quality', [UploadedFileController::class, 'quality'])->name('files.quality');
 
-    Route::resource('process', FileProcessingController::class)->only(['index', 'show']);
+    // Listing + preview/processing
+    Route::get('/my-files', [FileProcessingController::class, 'index'])->name('files.list');
+    Route::get('/my-files/{slug}', [FileProcessingController::class, 'show'])->name('files.preview');
 
-    Route::put('/files/{id}/cell', [FileProcessingController::class, 'updateCell']);
-    Route::post('/files/{id}/clean', [FileProcessingController::class, 'cleanData'])->name('files.clean');
-    Route::get('/files/{id}/quality-check', [FileProcessingController::class, 'qualityCheck'])->name('files.quality-check');
+    // File operations (slug-based)
+    Route::put('/files/{slug}/cell', [FileProcessingController::class, 'updateCell'])->name('files.cell.update');
+    Route::post('/files/{slug}/clean', [FileProcessingController::class, 'cleanData'])->name('files.clean');
+    Route::get('/files/{slug}/quality-check', [FileProcessingController::class, 'qualityCheck'])->name('files.quality-check');
 });

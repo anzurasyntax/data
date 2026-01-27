@@ -3,16 +3,40 @@
 namespace App\Services;
 
 use App\Models\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UploadedFileService
 {
     public function store($fileType, $file, ?int $userId = null): UploadedFile
     {
-        $path = $file->store('uploads', 'public');
+        $originalName = (string) $file->getClientOriginalName();
+        $base = pathinfo($originalName, PATHINFO_FILENAME);
+        $ext = strtolower((string) pathinfo($originalName, PATHINFO_EXTENSION));
+        $baseSlug = Str::slug($base) ?: 'file';
+
+        // Keep slug unique per user; also keep filename readable.
+        $slug = $baseSlug;
+        if ($userId !== null) {
+            $i = 2;
+            while (UploadedFile::where('user_id', $userId)->where('slug', $slug)->exists()) {
+                $slug = $baseSlug . '-' . $i;
+                $i++;
+            }
+        } else {
+            // API / legacy uploads without user: keep globally unique-ish
+            $slug = $baseSlug . '-' . Str::lower(Str::random(6));
+        }
+
+        $safeExt = $ext ?: $fileType;
+        $fileName = $slug . '.' . $safeExt;
+        $dir = $userId ? "uploads/user-{$userId}" : 'uploads/public';
+        $path = Storage::disk('public')->putFileAs($dir, $file, $fileName);
 
         return UploadedFile::create(array_filter([
             'user_id'       => $userId,
-            'original_name' => $file->getClientOriginalName(),
+            'slug'          => $slug,
+            'original_name' => $originalName,
             'file_type'     => $fileType,
             'file_path'     => $path,
             'mime_type'     => $file->getClientMimeType(),
@@ -28,6 +52,13 @@ class UploadedFileService
     public function findForUser(int|string $id, int $userId): UploadedFile
     {
         return UploadedFile::where('id', $id)
+            ->where('user_id', $userId)
+            ->firstOrFail();
+    }
+
+    public function findForUserBySlug(string $slug, int $userId): UploadedFile
+    {
+        return UploadedFile::where('slug', $slug)
             ->where('user_id', $userId)
             ->firstOrFail();
     }

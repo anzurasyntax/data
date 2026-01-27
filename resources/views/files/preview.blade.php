@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
     <style>
-        /* Critical styles only */
         .filtered-row { display: none !important; }
         .cell-input {
             width: 100%;
@@ -21,8 +20,6 @@
         .updating { opacity: 0.6; pointer-events: none; }
         .success-flash { animation: flash 0.5s; }
         @keyframes flash { 0%, 100% { background: inherit; } 50% { background: #bbf7d0; } }
-
-        /* Sidebar transition */
         .sidebar {
             transition: width 0.3s ease-in-out;
         }
@@ -37,7 +34,6 @@
             opacity: 1;
         }
 
-        /* Excel-like table */
         .data-table {
             table-layout: fixed;
             border-collapse: separate;
@@ -48,18 +44,14 @@
             max-width: 300px;
         }
 
-        /* Row hover */
         .data-row:hover td {
             background-color: #eff6ff !important;
         }
-
-        /* Column hover effect */
         td.excel-cell:hover {
             background-color: #dbeafe !important;
             box-shadow: inset 0 0 0 1px #1e40af;
         }
 
-        /* Scrollbar styling */
         .custom-scrollbar::-webkit-scrollbar {
             width: 12px;
             height: 12px;
@@ -79,11 +71,8 @@
 </head>
 
 <body class="bg-[#f8fafc]">
-
-<!-- Sidebar -->
 <div class="fixed left-0 top-0 h-full bg-[#1e293b] shadow-[4px_0_8px_rgba(0,0,0,0.1)] z-50 sidebar w-16 hover:w-64">
     <div class="flex flex-col h-full">
-        <!-- Logo/Brand -->
         <div class="p-4 border-b border-[#334155]">
             <div class="flex items-center justify-center sidebar-icon">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,10 +83,7 @@
                 <h2 class="text-white font-semibold text-base whitespace-nowrap">Data Overview</h2>
             </div>
         </div>
-
-        <!-- Stats Items -->
         <div class="flex-1 py-4 space-y-1">
-            <!-- Total Rows -->
             <div class="px-3 py-3 hover:bg-[#334155] transition-colors cursor-pointer">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-[#334155] rounded-md flex items-center justify-center flex-shrink-0">
@@ -111,8 +97,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Data Columns -->
             <div class="px-3 py-3 hover:bg-[#334155] transition-colors cursor-pointer">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-[#334155] rounded-md flex items-center justify-center flex-shrink-0">
@@ -126,8 +110,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Duplicate Rows -->
             <div class="px-3 py-3 hover:bg-[#334155] transition-colors cursor-pointer">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-[#b45309] rounded-md flex items-center justify-center flex-shrink-0">
@@ -141,8 +123,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Empty Cells -->
             <div class="px-3 py-3 hover:bg-[#334155] transition-colors cursor-pointer">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-[#991b1b] rounded-md flex items-center justify-center flex-shrink-0">
@@ -159,8 +139,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Filtered Rows (hidden by default) -->
             <div class="px-3 py-3 hover:bg-[#334155] transition-colors cursor-pointer" id="filtered-rows-card" style="display: none;">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-[#1e40af] rounded-md flex items-center justify-center flex-shrink-0">
@@ -177,11 +155,8 @@
         </div>
     </div>
 </div>
-
-<!-- Main Content -->
 <div class="ml-16 transition-all duration-300">
     <div class="p-6">
-        <!-- Header -->
         <div class="mb-5 bg-white border border-[#e2e8f0] rounded-lg p-4 shadow-sm">
             <div class="flex items-center justify-between">
                 <div>
@@ -202,7 +177,6 @@
             </div>
         </div>
 
-        <!-- Advanced Cleaning Tools Panel -->
         <div id="cleaning-tools-panel" class="mb-5 bg-white border border-[#e2e8f0] rounded-lg shadow-lg hidden">
             <div class="p-6">
                 <h2 class="text-xl font-semibold text-[#1e293b] mb-4 flex items-center">
@@ -213,7 +187,6 @@
                 </h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Missing Values Imputation -->
                     <div class="border border-[#e2e8f0] rounded-lg p-4">
                         <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
                             <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
@@ -252,8 +225,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Outlier Handling -->
                     <div class="border border-[#e2e8f0] rounded-lg p-4">
                         <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
                             <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
@@ -296,8 +267,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Duplicate Removal -->
                     <div class="border border-[#e2e8f0] rounded-lg p-4">
                         <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
                             <span class="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
@@ -332,8 +301,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Normalization -->
                     <div class="border border-[#e2e8f0] rounded-lg p-4">
                         <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
                             <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
@@ -364,8 +331,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Bulk Operations -->
                     <div class="border border-[#e2e8f0] rounded-lg p-4">
                         <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
                             <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
@@ -383,8 +348,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Operations History -->
                     <div class="border border-[#e2e8f0] rounded-lg p-4">
                         <h3 class="font-semibold text-[#1e293b] mb-3 flex items-center">
                             <span class="w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
@@ -398,7 +361,6 @@
             </div>
         </div>
 
-        <!-- Excel-like Table Container -->
         <div class="bg-white rounded-lg shadow-sm border border-[#e2e8f0] overflow-hidden">
             <div class="overflow-auto max-h-[calc(100vh-180px)] custom-scrollbar">
                 <table class="min-w-full data-table">
@@ -412,8 +374,6 @@
                                 $hasSummary = !empty($stats['stats']);
                             @endphp
                             <th class="border-r border-b-2 border-[#cbd5e1] text-left excel-cell relative overflow-visible bg-[#f8fafc]" data-column="{{ $col }}">
-
-                                <!-- Summary Box -->
                                 <div class="relative {{ $hasSummary ? 'bg-[#1e40af] hover:bg-[#1e3a8a] cursor-pointer group' : 'bg-[#cbd5e1] cursor-default' }} p-2.5 text-center text-white text-xs font-semibold border-b {{ $hasSummary ? 'border-[#1e3a8a]' : 'border-[#94a3b8]' }} transition-colors">
                                     <span class="{{ $hasSummary ? '' : 'text-[#64748b]' }}">Summary</span>
                                     @if($hasSummary)
@@ -445,7 +405,6 @@
                                     @endif
                                 </div>
 
-                                <!-- Column Info -->
                                 <div class="p-3 bg-[#f8fafc]">
                                     <div class="mb-3">
                                         <div class="flex items-center mb-2">
@@ -487,8 +446,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Type Filter Dropdown -->
                                 <div class="px-3 pb-2 bg-[#f8fafc]">
                                     <select class="w-full text-xs py-2 px-2.5 border border-[#cbd5e1] rounded bg-white cursor-pointer font-medium hover:border-[#64748b] focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] transition-colors filter-dropdown" data-column="{{ $col }}">
                                         <option value="all">All Rows</option>
@@ -503,8 +460,6 @@
                                         @endif
                                     </select>
                                 </div>
-
-                                <!-- Value Filter Dropdown -->
                                 <div class="relative px-3 pb-3 overflow-visible bg-[#f8fafc]" data-value-container="{{ $col }}">
                                     <button class="w-full text-xs py-2 px-2.5 border border-[#cbd5e1] rounded bg-white cursor-pointer font-medium hover:border-[#64748b] transition-colors text-left flex justify-between items-center value-filter-button" data-column="{{ $col }}">
                                         <span class="filter-text">Filter Values</span>
@@ -518,7 +473,6 @@
                                             <input type="text" class="w-full py-1.5 px-2.5 border border-[#cbd5e1] rounded text-xs focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] value-search-input font-medium" placeholder="Search values...">
                                         </div>
                                         <div class="max-h-40 overflow-y-auto p-2 value-list-container custom-scrollbar">
-                                            <!-- Values populated dynamically -->
                                         </div>
                                         <div class="p-2 border-t border-[#e2e8f0] flex flex-col gap-1.5 bg-[#f8fafc]">
                                             <button class="flex-1 py-2 px-3 text-xs rounded bg-[#166534] text-white font-semibold hover:bg-[#14532d] transition-colors btn-apply">Apply</button>
@@ -532,9 +486,7 @@
                     </tr>
                     </thead>
 
-                    <tbody id="table-body">
-                        <!-- Rows will be rendered dynamically via virtual scrolling -->
-                    </tbody>
+                    <tbody id="table-body"></tbody>
                 </table>
             </div>
         </div>
@@ -545,7 +497,6 @@
     const FILE_ID = {{ $file->id }};
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 
-    // Store all data
     const allData = @json($result['data']);
     const columnsList = @json($result['columns_list']);
     let columnStats = @json($result['column_stats']);
@@ -555,22 +506,19 @@
     let pendingValueFilters = {};
     let valueCounts = {};
 
-    // Virtual scrolling configuration
-    const ROW_HEIGHT = 41; // Approximate row height in pixels
-    const BUFFER_ROWS = 20; // Number of rows to render above and below viewport
+    const ROW_HEIGHT = 41;
+    const BUFFER_ROWS = 20;
     let startIndex = 0;
-    let endIndex = 100; // Initial rows to render
+    let endIndex = 100;
     let scrollContainer = null;
     let tableBody = null;
 
-    // Initialize virtual scrolling
     function initVirtualScrolling() {
         tableBody = document.getElementById('table-body');
         const tableContainer = tableBody.closest('.overflow-auto');
 
         if (!tableContainer) return;
 
-        // Create spacer elements
         const topSpacer = document.createElement('tr');
         topSpacer.id = 'top-spacer';
         topSpacer.innerHTML = '<td colspan="' + columnsList.length + '"></td>';
@@ -584,34 +532,25 @@
         tableBody.appendChild(bottomSpacer);
 
         scrollContainer = tableContainer;
-
-        // Initial render - use filteredData if available, otherwise allData
         const initialData = filteredData !== null ? filteredData : allData;
         renderRows(0, Math.min(endIndex, initialData.length));
-
-        // Scroll event listener
         tableContainer.addEventListener('scroll', handleScroll);
 
-        // Initial scroll handler
         handleScroll();
     }
 
-    // Handle scroll event
     function handleScroll() {
         if (!scrollContainer) return;
 
         const scrollTop = scrollContainer.scrollTop;
         const containerHeight = scrollContainer.clientHeight;
 
-        // Always use filteredData (will be allData when no filters, or filtered results when filters active)
         const dataToRender = filteredData !== null ? filteredData : allData;
 
-        // Calculate which rows should be visible
         const newStartIndex = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - BUFFER_ROWS);
         const visibleRows = Math.ceil(containerHeight / ROW_HEIGHT);
         const newEndIndex = Math.min(dataToRender.length, newStartIndex + visibleRows + (BUFFER_ROWS * 2));
 
-        // Only re-render if viewport changed significantly
         if (Math.abs(newStartIndex - startIndex) > 10 || Math.abs(newEndIndex - endIndex) > 10) {
             startIndex = newStartIndex;
             endIndex = newEndIndex;
@@ -619,36 +558,28 @@
         }
     }
 
-    // Render visible rows
     function renderRows(start, end) {
         if (!tableBody) return;
 
-        // Always use filteredData (will be allData when no filters, or filtered results when filters active)
         const dataToRender = filteredData !== null ? filteredData : allData;
-
-        // Get spacers
         const topSpacer = document.getElementById('top-spacer');
         const bottomSpacer = document.getElementById('bottom-spacer');
         const rowsToRender = [];
 
-        // Update top spacer
         if (topSpacer) {
             topSpacer.style.height = (start * ROW_HEIGHT) + 'px';
         }
 
-        // Render visible rows
         for (let i = start; i < end; i++) {
             if (i >= dataToRender.length) break;
 
             const row = dataToRender[i];
-            // Get original index for cell updates
             const originalIndex = allData.indexOf(row);
             const rowIndex = originalIndex >= 0 ? originalIndex : i;
             const rowElement = createRowElement(row, rowIndex, i);
             rowsToRender.push(rowElement);
         }
 
-        // Remove old rows (keep spacers)
         const existingRows = Array.from(tableBody.querySelectorAll('tr.data-row'));
         existingRows.forEach(row => {
             const rowIdx = parseInt(row.dataset.viewIndex);
@@ -657,30 +588,25 @@
             }
         });
 
-        // Insert new rows before bottom spacer
         if (bottomSpacer && rowsToRender.length > 0) {
             rowsToRender.forEach(row => {
                 tableBody.insertBefore(row, bottomSpacer);
             });
         }
-
-        // Update bottom spacer
         if (bottomSpacer) {
             const remainingRows = Math.max(0, dataToRender.length - end);
             bottomSpacer.style.height = (remainingRows * ROW_HEIGHT) + 'px';
         }
 
-        // Reattach event listeners to new rows
         attachCellEditListeners();
     }
 
-    // Create a row element
     function createRowElement(row, rowIndex, viewIndex) {
         const tr = document.createElement('tr');
         tr.className = ((viewIndex !== undefined ? viewIndex : rowIndex) % 2 === 0 ? 'bg-white' : 'bg-[#f8fafc]') + ' data-row transition-colors';
-        tr.dataset.rowIndex = rowIndex; // Original index for updates
+        tr.dataset.rowIndex = rowIndex;
         if (viewIndex !== undefined) {
-            tr.dataset.viewIndex = viewIndex; // View index for filtering
+            tr.dataset.viewIndex = viewIndex;
         }
 
         columnsList.forEach(col => {
@@ -721,7 +647,6 @@
         valueCounts = {};
         columnsList.forEach(col => valueCounts[col] = {});
 
-        // Build counts from all data, not just rendered rows
         allData.forEach(row => {
             columnsList.forEach(col => {
                 const value = row[col] ?? '';
@@ -733,10 +658,8 @@
         });
     }
 
-    // Attach cell edit listeners
     function attachCellEditListeners() {
         document.querySelectorAll('.editable-cell').forEach(cell => {
-            // Remove existing listeners if any
             const newCell = cell.cloneNode(true);
             cell.parentNode.replaceChild(newCell, cell);
 
@@ -788,7 +711,6 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            // Update allData
                             if (allData[rowIndex]) {
                                 allData[rowIndex][column] = result.updated_value || null;
                             }
@@ -809,11 +731,9 @@
                             columnStats = result.column_stats;
                             outlierMap = result.outlier_map;
 
-                            // Rebuild counts and options after data change
                             buildValueCounts();
                             buildValueOptions();
-                            clearFilterCache(); // Clear filter cache since data changed
-
+                            clearFilterCache();
                             updateOutlierHighlights();
                             updateColumnHeaders();
                             updateSummaryCards(result);
@@ -850,17 +770,14 @@
         });
     }
 
-    // Initialize virtual scrolling on page load
     document.addEventListener('DOMContentLoaded', function() {
         buildValueCounts();
-        buildValueOptions(); // Pre-compute value options for fast filtering
+        buildValueOptions();
         populateValueFilters();
-        // Initialize filteredData with all data (no filters applied yet)
-        filteredData = getFilteredData(); // This will return allData since no filters are set
-        initFilterWorker(); // Initialize Web Worker for large datasets
+        filteredData = getFilteredData();
+        initFilterWorker();
         initVirtualScrolling();
 
-        // Show cleaning tools if ?clean=true in URL
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('clean') === 'true') {
             const panel = document.getElementById('cleaning-tools-panel');
@@ -882,13 +799,11 @@
 
             listContainer.innerHTML = '';
 
-            // Count empty cells from allData instead of DOM
             const emptyCells = allData.filter(row => {
                 const value = row[col] ?? '';
                 return value === '' || value === null;
             }).length;
 
-            // Get all unique values for this column from allData
             const values = Array.from(allValueOptions[col] || []).sort();
 
             if (values.length === 0 && emptyCells === 0) {
@@ -900,7 +815,6 @@
 
             const fragment = document.createDocumentFragment();
 
-            // Add empty cells option if any exist
             if (emptyCells > 0) {
                 const emptyItem = document.createElement('div');
                 emptyItem.className = 'flex items-center py-2 px-2 cursor-pointer rounded-md hover:bg-indigo-50 transition-colors';
@@ -912,7 +826,6 @@
                 fragment.appendChild(emptyItem);
             }
 
-            // Add value options
             values.forEach((value, index) => {
                 const item = document.createElement('div');
                 item.className = 'flex items-center py-2 px-2 cursor-pointer rounded-md hover:bg-indigo-50 transition-colors';
@@ -928,7 +841,6 @@
 
             listContainer.appendChild(fragment);
 
-            // Initialize filters with all values selected
             const allValues = new Set(values);
             if (emptyCells > 0) {
                 allValues.add('__EMPTY__');
@@ -1025,7 +937,7 @@
             }
 
             container.classList.add('hidden');
-            clearFilterCache(); // Clear cache when filters change
+            clearFilterCache();
             applyFilters();
         });
     });
@@ -1039,27 +951,24 @@
             } else {
                 activeFilters[column] = filterType;
             }
-            clearFilterCache(); // Clear cache when filters change
+            clearFilterCache();
 
-            // Debug logging
             console.log('Filter changed:', { column, filterType, activeFilters, valueFilters });
 
             applyFilters();
         });
     });
 
-    // Filtered data array for virtual scrolling and performance optimization
-    let filteredData = null; // null means not initialized, empty array means filtered to nothing
+
+    let filteredData = null;
     let filterCache = null;
     let filterCacheKey = '';
-    let allValueOptions = {}; // Cache of all possible values per column
+    let allValueOptions = {};
 
-    // Ensure allValueOptions is initialized before use
     if (!allValueOptions || Object.keys(allValueOptions).length === 0) {
         allValueOptions = {};
     }
 
-    // Pre-compute value options for faster filtering
     function buildValueOptions() {
         allValueOptions = {};
         columnsList.forEach(col => {
@@ -1077,7 +986,6 @@
         });
     }
 
-    // Get filter cache key for memoization
     function getFilterCacheKey() {
         const activeKeys = Object.keys(activeFilters)
             .filter(k => activeFilters[k] !== 'all')
@@ -1097,12 +1005,9 @@
         return `active:${activeKeys}|values:${valueKeys}`;
     }
 
-    // Optimized filter function with caching and early exits
     function getFilteredData() {
-        // Get cache key first
         const currentCacheKey = getFilterCacheKey();
 
-        // Check if we have any active filters
         const hasActiveFilters = Object.keys(activeFilters || {}).some(col => activeFilters[col] && activeFilters[col] !== 'all');
         const hasValueFilters = Object.keys(valueFilters || {}).some(col => {
             const selected = valueFilters[col];
@@ -1111,7 +1016,6 @@
             return selected.size > 0 && selected.size < total;
         });
 
-        // No filters active - return all data
         if (!hasActiveFilters && !hasValueFilters) {
             filterCache = allData;
             filterCacheKey = currentCacheKey;
@@ -1121,12 +1025,10 @@
 
         console.log('Filters active - Active filters:', hasActiveFilters, 'Value filters:', hasValueFilters);
 
-        // Check cache
         if (filterCache && filterCacheKey === currentCacheKey) {
             return filterCache;
         }
 
-        // Build filter predicates for better performance
         const activeFilterPredicates = [];
         Object.entries(activeFilters).forEach(([column, filterType]) => {
             if (filterType === 'all') return;
@@ -1155,7 +1057,6 @@
             if (!selectedValues || selectedValues.size === 0) return;
 
             const totalOptions = allValueOptions[column] ? allValueOptions[column].size : 0;
-            // If all values selected, no filtering needed
             if (selectedValues.size >= totalOptions) return;
 
             valueFilterPredicates.push((row) => {
@@ -1170,16 +1071,13 @@
             });
         });
 
-        // Apply filters with early exit optimization
         filterCache = allData.filter((row, rowIndex) => {
-            // Apply active filters first (usually faster)
             for (const predicate of activeFilterPredicates) {
                 if (!predicate(row, rowIndex)) {
                     return false;
                 }
             }
 
-            // Apply value filters (only if no active filter already rejected)
             if (valueFilterPredicates.length > 0) {
                 for (const predicate of valueFilterPredicates) {
                     if (!predicate(row)) {
@@ -1195,16 +1093,13 @@
         return filterCache;
     }
 
-    // Web Worker for background filtering (for large datasets)
     let filterWorker = null;
     let isFiltering = false;
     let filterProgressBar = null;
 
-    // Initialize Web Worker if available and dataset is large
     function initFilterWorker() {
         if (typeof Worker !== 'undefined' && allData.length > 10000) {
             try {
-                // Use absolute path for worker
                 const workerPath = '{{ asset("js/filter-worker.js") }}' || '/js/filter-worker.js';
                 filterWorker = new Worker(workerPath);
                 filterWorker.onmessage = function(e) {
@@ -1216,10 +1111,7 @@
                         isFiltering = false;
                         hideFilterProgress();
 
-                        // Assign the filtered data from worker
                         filteredData = workerFilteredData;
-
-                        // Reset scroll position and re-render
                         startIndex = 0;
                         endIndex = Math.min(100, filteredData.length);
 
@@ -1234,7 +1126,6 @@
 
                 filterWorker.onerror = function(error) {
                     console.error('Filter worker error:', error);
-                    // Fallback to regular filtering
                     filterWorker = null;
                     applyFiltersRegular();
                 };
@@ -1245,7 +1136,6 @@
         }
     }
 
-    // Create filter progress UI
     function createFilterProgressBar() {
         if (filterProgressBar) return;
 
@@ -1286,7 +1176,6 @@
         }
     }
 
-    // Adaptive debounce based on dataset size
     function getDebounceTime() {
         if (allData.length > 50000) return 300;
         if (allData.length > 10000) return 200;
@@ -1294,7 +1183,6 @@
         return 100;
     }
 
-    // Regular filtering (for small datasets or fallback)
     function applyFiltersRegular() {
         try {
             console.log('Applying filters - Active:', activeFilters, 'Value:', Object.keys(valueFilters || {}).reduce((acc, k) => {
@@ -1303,8 +1191,6 @@
             }, {}));
 
             filteredData = getFilteredData();
-
-            // Ensure filteredData is always an array
             if (!Array.isArray(filteredData)) {
                 console.warn('Filtered data is not an array, using allData');
                 filteredData = allData;
@@ -1312,7 +1198,6 @@
 
             console.log('Filtered data length:', filteredData.length, 'from', allData.length);
 
-            // Reset scroll position and re-render
             startIndex = 0;
             endIndex = Math.min(100, filteredData.length);
 
@@ -1324,7 +1209,6 @@
             updateFilteredRowCount();
         } catch (error) {
             console.error('Error in applyFiltersRegular:', error, error.stack);
-            // Fallback to showing all data
             filteredData = allData;
             if (scrollContainer) {
                 scrollContainer.scrollTop = 0;
@@ -1334,21 +1218,17 @@
         }
     }
 
-    // Debounced filter application for better performance
     let filterTimeout = null;
     let filterRAF = null;
     function applyFilters() {
-        // Clear any pending filter applications
         if (filterTimeout) clearTimeout(filterTimeout);
         if (filterRAF) cancelAnimationFrame(filterRAF);
 
-        // Cancel any ongoing worker filtering
         if (filterWorker && isFiltering) {
             filterWorker.terminate();
-            initFilterWorker(); // Reinitialize worker
+            initFilterWorker();
         }
 
-        // Use Web Worker for large datasets (> 10000 rows)
         if (filterWorker && allData.length > 10000) {
             isFiltering = true;
             showFilterProgress();
@@ -1368,7 +1248,6 @@
                 });
             }, 50);
         } else {
-            // Use regular filtering for small/medium datasets (<= 10000 rows)
             const debounceTime = getDebounceTime();
             filterTimeout = setTimeout(() => {
                 filterRAF = requestAnimationFrame(() => {
@@ -1376,7 +1255,6 @@
                         applyFiltersRegular();
                     } catch (error) {
                         console.error('Filter error:', error);
-                        // Fallback: show all data if filter fails
                         filteredData = allData;
                         renderRows(0, Math.min(100, allData.length));
                     }
@@ -1385,13 +1263,11 @@
         }
     }
 
-    // Clear filter cache when data changes
     function clearFilterCache() {
         filterCache = null;
         filterCacheKey = '';
     }
 
-    // Update filtered row count in sidebar
     function updateFilteredRowCount() {
         const countEl = document.getElementById('filtered-row-count');
         const cardEl = document.getElementById('filtered-rows-card');
@@ -1407,10 +1283,7 @@
         }
     }
 
-    // Cell edit listeners are attached via attachCellEditListeners() in virtual scrolling
-
     function updateOutlierHighlights() {
-        // Re-render visible rows to update outlier highlights
         if (typeof startIndex !== 'undefined' && typeof endIndex !== 'undefined') {
             renderRows(startIndex, endIndex);
         }
@@ -1464,10 +1337,8 @@
         document.getElementById('sidebar-empty-count').textContent = totalEmpty.toLocaleString();
     }
 
-    // Cleaning Tools JavaScript
     let operationsHistory = [];
 
-    // Toggle cleaning tools panel
     document.getElementById('toggle-cleaning-tools').addEventListener('click', function() {
         const panel = document.getElementById('cleaning-tools-panel');
         const btnText = document.getElementById('tools-btn-text');
@@ -1475,25 +1346,21 @@
         btnText.textContent = panel.classList.contains('hidden') ? 'Show Cleaning Tools' : 'Hide Cleaning Tools';
     });
 
-    // Show/hide impute value input
     document.getElementById('impute-method').addEventListener('change', function() {
         const container = document.getElementById('impute-value-container');
         container.classList.toggle('hidden', this.value !== 'constant');
     });
 
-    // Show/hide winsorize percentiles
     document.getElementById('outlier-method').addEventListener('change', function() {
         const container = document.getElementById('winsorize-percentiles');
         container.classList.toggle('hidden', this.value !== 'winsorize');
     });
 
-    // Show/hide duplicate columns selector
     document.getElementById('duplicate-scope').addEventListener('change', function() {
         const container = document.getElementById('duplicate-columns-container');
         container.classList.toggle('hidden', this.value !== 'selected');
     });
 
-    // Apply cleaning operation
     async function applyCleaningOperation(operations) {
         try {
             const response = await fetch(`/api/file/${FILE_ID}/clean`, {
@@ -1509,7 +1376,6 @@
             const result = await response.json();
 
             if (result.success) {
-                // Reload page to show updated data
                 window.location.reload();
             } else {
                 alert('Error: ' + result.message);
@@ -1520,7 +1386,6 @@
         }
     }
 
-    // Add to operations history
     function addToHistory(operation) {
         operationsHistory.unshift(operation);
         const historyEl = document.getElementById('operations-history');
@@ -1532,14 +1397,12 @@
         item.textContent = `${new Date().toLocaleTimeString()} - ${operation}`;
         historyEl.insertBefore(item, historyEl.firstChild);
 
-        // Keep only last 10 operations
         if (operationsHistory.length > 10) {
             operationsHistory.pop();
             if (historyEl.lastChild) historyEl.removeChild(historyEl.lastChild);
         }
     }
 
-    // Imputation
     function applyImputation() {
         const column = document.getElementById('impute-column').value;
         const method = document.getElementById('impute-method').value;
@@ -1569,7 +1432,6 @@
         applyCleaningOperation([operation]);
     }
 
-    // Outlier handling
     function applyOutlierHandling() {
         const column = document.getElementById('outlier-column').value;
         const method = document.getElementById('outlier-method').value;
@@ -1596,7 +1458,6 @@
         applyCleaningOperation([operation]);
     }
 
-    // Duplicate removal
     function applyDuplicateRemoval() {
         const scope = document.getElementById('duplicate-scope').value;
         const keep = document.getElementById('duplicate-keep').value;
@@ -1621,7 +1482,6 @@
         applyCleaningOperation([operation]);
     }
 
-    // Normalization
     function applyNormalization() {
         const column = document.getElementById('normalize-column').value;
         const method = document.getElementById('normalize-method').value;
@@ -1641,7 +1501,6 @@
         applyCleaningOperation([operation]);
     }
 
-    // Bulk operations
     function removeAllEmptyRows() {
         if (!confirm('This will remove all rows that have any empty cells. Continue?')) return;
 

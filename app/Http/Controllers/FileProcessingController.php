@@ -8,6 +8,7 @@ use App\Services\UploadedFileService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class FileProcessingController extends Controller
@@ -23,7 +24,7 @@ class FileProcessingController extends Controller
         return view('files.index', compact('files'));
     }
 
-    public function show($id): Factory|View
+    public function show($id): View|Factory|RedirectResponse
     {
         try {
             $file = $this->fileService->find($id);

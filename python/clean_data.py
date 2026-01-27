@@ -17,14 +17,14 @@ def to_native(obj):
 def load_file(file_path, file_type):
     """Load file based on type with proper error handling."""
     file_path = os.path.normpath(file_path)
-    
+
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
-    
+
     allowed_types = ['csv', 'txt', 'xml', 'xlsx']
     if file_type not in allowed_types:
         raise ValueError(f"Unsupported file type: {file_type}")
-    
+
     try:
         if file_type == 'csv':
             df = pd.read_csv(file_path)
@@ -47,7 +47,7 @@ def load_file(file_path, file_type):
                 raise Exception(f"Failed to read Excel file: {str(e)}")
         else:
             raise ValueError(f"Unsupported file type: {file_type}")
-        
+
         return df
     except pd.errors.EmptyDataError:
         raise ValueError("The file is empty or contains no valid data")
@@ -59,7 +59,7 @@ def load_file(file_path, file_type):
 def save_file(df, file_path, file_type):
     """Save DataFrame to file based on type."""
     file_path = os.path.normpath(file_path)
-    
+
     try:
         if file_type == 'csv':
             df.to_csv(file_path, index=False)
@@ -83,16 +83,15 @@ def impute_missing_values(df, column, method, value=None):
     """Impute missing values in a column using specified method."""
     if column not in df.columns:
         raise ValueError(f"Column '{column}' does not exist")
-    
+
     col_data = df[column].copy()
     str_col = col_data.astype(str)
-    # Include NaN, empty strings, and whitespace-only strings as missing
-    # str_col.str.strip() == '' catches both empty strings and whitespace-only strings
+
     missing_mask = col_data.isna() | (str_col.str.strip() == '')
-    
+
     if not missing_mask.any():
-        return df  # No missing values
-    
+        return df
+
     if method == 'mean':
         numeric_values = pd.to_numeric(col_data, errors='coerce')
         impute_value = numeric_values.mean()
@@ -113,7 +112,7 @@ def impute_missing_values(df, column, method, value=None):
     elif method == 'interpolate':
         numeric_values = pd.to_numeric(col_data, errors='coerce')
         df[column] = numeric_values.interpolate(method='linear')
-        # Fill any remaining NaN with forward/backward fill
+
         df[column] = df[column].fillna(method='ffill').fillna(method='bfill')
     elif method == 'constant':
         if value is None:
@@ -126,54 +125,49 @@ def impute_missing_values(df, column, method, value=None):
         df = df.drop(columns=[column])
     else:
         raise ValueError(f"Unknown imputation method: {method}")
-    
+
     return df
 
 def handle_outliers(df, column, method, lower_percentile=None, upper_percentile=None):
     """Handle outliers in a column using specified method."""
     if column not in df.columns:
         raise ValueError(f"Column '{column}' does not exist")
-    
+
     col_data = pd.to_numeric(df[column], errors='coerce')
     non_null = col_data.dropna()
-    
+
     if len(non_null) == 0:
         return df
-    
-    # Calculate IQR
+
     q1 = non_null.quantile(0.25)
     q3 = non_null.quantile(0.75)
     iqr = q3 - q1
-    
+
     if iqr > 0:
         lower = q1 - 1.5 * iqr
         upper = q3 + 1.5 * iqr
     else:
-        # If IQR is 0, use percentile-based method
         if lower_percentile and upper_percentile:
             lower = non_null.quantile(lower_percentile / 100)
             upper = non_null.quantile(upper_percentile / 100)
         else:
             lower = non_null.min()
             upper = non_null.max()
-    
+
     outlier_mask = (col_data < lower) | (col_data > upper)
-    
+
     if method == 'remove':
         df = df[~outlier_mask]
     elif method == 'cap':
         df.loc[col_data < lower, column] = lower
         df.loc[col_data > upper, column] = upper
     elif method == 'transform_log':
-        # Apply log transformation (only to positive values)
         positive_mask = col_data > 0
         df.loc[positive_mask, column] = np.log1p(col_data[positive_mask])
     elif method == 'transform_sqrt':
-        # Apply square root transformation (only to non-negative values)
         non_negative_mask = col_data >= 0
         df.loc[non_negative_mask, column] = np.sqrt(col_data[non_negative_mask])
     elif method == 'winsorize':
-        # Cap at specific percentiles
         if lower_percentile and upper_percentile:
             lower_bound = non_null.quantile(lower_percentile / 100)
             upper_bound = non_null.quantile(upper_percentile / 100)
@@ -184,7 +178,7 @@ def handle_outliers(df, column, method, lower_percentile=None, upper_percentile=
         df.loc[col_data > upper_bound, column] = upper_bound
     else:
         raise ValueError(f"Unknown outlier handling method: {method}")
-    
+
     return df
 
 def remove_duplicates(df, columns=None, keep='first'):
@@ -200,9 +194,9 @@ def normalize_column(df, column, method='min_max'):
     """Normalize a column using specified method."""
     if column not in df.columns:
         raise ValueError(f"Column '{column}' does not exist")
-    
+
     col_data = pd.to_numeric(df[column], errors='coerce')
-    
+
     if method == 'min_max':
         min_val = col_data.min()
         max_val = col_data.max()
@@ -220,7 +214,7 @@ def normalize_column(df, column, method='min_max'):
             df[column] = (col_data - median_val) / mad
     else:
         raise ValueError(f"Unknown normalization method: {method}")
-    
+
     return df
 
 def standardize_column(df, column):
@@ -233,17 +227,17 @@ def main():
         file_path = payload.get("file_path")
         file_type = payload.get("file_type")
         operations = payload.get("operations", [])
-        
+
         if not file_path or not file_type:
             raise ValueError("file_path and file_type are required")
-        
+
         # Load file
         df = load_file(file_path, file_type)
         original_rows = len(df)
-        
+
         # Apply operations
         applied_operations = []
-        
+
         for op in operations:
             op_type = op.get("type")
             op_method = op.get("method")
@@ -252,7 +246,7 @@ def main():
             op_columns = op.get("columns")
             op_lower_percentile = op.get("lower_percentile")
             op_upper_percentile = op.get("upper_percentile")
-            
+
             if op_type == "impute_missing":
                 df = impute_missing_values(df, op_column, op_method, op_value)
                 applied_operations.append({
@@ -261,7 +255,7 @@ def main():
                     "method": op_method,
                     "rows_affected": "calculated"
                 })
-            
+
             elif op_type == "handle_outliers":
                 df = handle_outliers(df, op_column, op_method, op_lower_percentile, op_upper_percentile)
                 applied_operations.append({
@@ -269,7 +263,7 @@ def main():
                     "column": op_column,
                     "method": op_method
                 })
-            
+
             elif op_type == "remove_duplicates":
                 df = remove_duplicates(df, op_columns, op_method if op_method else 'first')
                 applied_operations.append({
@@ -277,7 +271,7 @@ def main():
                     "columns": op_columns,
                     "rows_removed": original_rows - len(df)
                 })
-            
+
             elif op_type == "normalize":
                 df = normalize_column(df, op_column, op_method)
                 applied_operations.append({
@@ -285,14 +279,14 @@ def main():
                     "column": op_column,
                     "method": op_method
                 })
-            
+
             elif op_type == "standardize":
                 df = standardize_column(df, op_column)
                 applied_operations.append({
                     "type": "standardize",
                     "column": op_column
                 })
-            
+
             elif op_type == "remove_column":
                 if op_column in df.columns:
                     df = df.drop(columns=[op_column])
@@ -300,7 +294,7 @@ def main():
                         "type": "remove_column",
                         "column": op_column
                     })
-            
+
             elif op_type == "remove_rows_with_missing":
                 if op_column:
                     # Remove rows with NaN, empty strings, or whitespace-only strings in the column
@@ -325,10 +319,10 @@ def main():
                     "column": op_column,
                     "rows_removed": original_rows - len(df)
                 })
-        
+
         # Save cleaned file
         save_file(df, file_path, file_type)
-        
+
         # Recalculate statistics
         result = {
             "success": True,
@@ -338,9 +332,9 @@ def main():
             "applied_operations": applied_operations,
             "message": f"Data cleaned successfully. {len(applied_operations)} operation(s) applied."
         }
-        
+
         print(json.dumps(result, default=to_native))
-        
+
     except Exception as e:
         error_result = {
             "success": False,

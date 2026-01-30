@@ -55,6 +55,18 @@
                         </td>
                         <td class="border px-3 md:px-4 py-2 text-center align-middle">
                             <div class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3">
+                                <a href="{{ route('files.preview', $file->slug) }}"
+                                   class="text-blue-600 hover:text-blue-800 underline text-xs md:text-sm">
+                                    Preview
+                                </a>
+                                <a href="{{ route('files.visualize', $file->slug) }}"
+                                   class="text-emerald-600 hover:text-emerald-800 underline text-xs md:text-sm">
+                                    Visualize
+                                </a>
+                                <a href="{{ route('files.insight-strategy', $file->slug) }}"
+                                   class="text-amber-600 hover:text-amber-800 underline text-xs md:text-sm">
+                                    Insight & Strategy
+                                </a>
                                 <a href="{{ route('files.quality', $file->slug) }}"
                                    class="text-blue-600 hover:text-blue-800 underline text-xs md:text-sm">
                                     Quality

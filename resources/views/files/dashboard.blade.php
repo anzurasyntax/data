@@ -112,7 +112,8 @@
                             <th class="py-2 pr-3 text-left font-medium">File</th>
                             <th class="py-2 px-3 text-left font-medium hidden sm:table-cell">Type</th>
                             <th class="py-2 px-3 text-left font-medium">Quality</th>
-                            <th class="py-2 pl-3 text-right font-medium hidden md:table-cell">Uploaded</th>
+                            <th class="py-2 px-3 text-left font-medium hidden md:table-cell">Uploaded</th>
+                            <th class="py-2 pl-3 text-right font-medium">Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -156,8 +157,13 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="py-2 pl-3 align-middle text-right text-[11px] md:text-xs text-slate-400 hidden md:table-cell whitespace-nowrap">
+                                <td class="py-2 px-3 align-middle text-right text-[11px] md:text-xs text-slate-400 hidden md:table-cell whitespace-nowrap">
                                     {{ $file->created_at->format('Y-m-d H:i') }}
+                                </td>
+                                <td class="py-2 pl-3 align-middle text-right whitespace-nowrap">
+                                    <a href="{{ route('files.preview', $file->slug) }}" class="text-blue-300 hover:text-blue-200 text-xs font-medium mr-2">Preview</a>
+                                    <a href="{{ route('files.visualize', $file->slug) }}" class="text-emerald-300 hover:text-emerald-200 text-xs font-medium mr-2">Visualize</a>
+                                    <a href="{{ route('files.insight-strategy', $file->slug) }}" class="text-amber-300 hover:text-amber-200 text-xs font-medium">Insight & Strategy</a>
                                 </td>
                             </tr>
                         @endforeach
@@ -165,6 +171,19 @@
                     </table>
                 </div>
             @endif
+        </div>
+
+        <div class="rounded-2xl bg-slate-900/70 border border-slate-700/80 p-4 md:p-5">
+            <h2 class="text-base md:text-lg font-semibold mb-3">Data cleaning tools</h2>
+            <p class="text-xs text-slate-400 mb-3">Available in Preview → Show Cleaning Tools</p>
+            <ul class="space-y-2 text-xs text-slate-200">
+                <li><span class="text-red-400 font-medium">Handle missing values</span> — Mean, median, mode, forward/backward fill, interpolate, constant, remove rows/column</li>
+                <li><span class="text-purple-400 font-medium">Handle outliers</span> — Remove, cap at IQR, winsorize, log/sqrt transform</li>
+                <li><span class="text-orange-400 font-medium">Remove duplicates</span> — All columns or selected columns, keep first/last</li>
+                <li><span class="text-green-400 font-medium">Normalize column</span> — Min-max, z-score, robust (median & MAD)</li>
+                <li><span class="text-indigo-400 font-medium">Bulk operations</span> — Remove empty rows/columns, auto-impute all missing</li>
+            </ul>
+            <a href="{{ route('files.list') }}" class="mt-3 inline-block text-xs text-blue-300 hover:text-blue-200 underline">Open a file to use tools →</a>
         </div>
 
         <div class="rounded-2xl bg-slate-900/70 border border-slate-700/80 p-4 md:p-5">

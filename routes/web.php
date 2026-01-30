@@ -40,4 +40,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/files/{slug}/cell', [FileProcessingController::class, 'updateCell'])->name('files.cell.update');
     Route::post('/files/{slug}/clean', [FileProcessingController::class, 'cleanData'])->name('files.clean');
     Route::get('/files/{slug}/quality-check', [FileProcessingController::class, 'qualityCheck'])->name('files.quality-check');
+    Route::get('/files/{slug}/visualize', [FileProcessingController::class, 'visualize'])->name('files.visualize');
+    Route::get('/files/{slug}/visualize-data', [FileProcessingController::class, 'visualizeData'])->name('files.visualize-data');
+    Route::get('/files/{slug}/visualize-suggestions', [FileProcessingController::class, 'visualizeSuggestions'])->name('files.visualize-suggestions');
+    Route::post('/files/{slug}/visualize-build', [FileProcessingController::class, 'visualizeBuild'])->name('files.visualize-build');
+    Route::get('/files/{slug}/insight-strategy', [FileProcessingController::class, 'insightStrategy'])->name('files.insight-strategy');
+    Route::get('/files/{slug}/insight-strategy-data', [FileProcessingController::class, 'insightStrategyData'])->name('files.insight-strategy-data');
 });

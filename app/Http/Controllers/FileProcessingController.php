@@ -148,4 +148,128 @@ class FileProcessingController extends Controller
             ], 500);
         }
     }
+
+    public function visualize(string $slug): View|Factory|RedirectResponse
+    {
+        try {
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
+            return view('files.visualize', compact('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('files.list')
+                ->with('error', 'File not found: ' . $e->getMessage());
+        }
+    }
+
+    public function visualizeData(string $slug): JsonResponse
+    {
+        try {
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
+
+            $result = $this->pythonService->process('visualize_data.py', [
+                'file_type' => $file->file_type,
+                'file_path' => storage_path("app/public/{$file->file_path}")
+            ]);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function visualizeSuggestions(string $slug): JsonResponse
+    {
+        try {
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
+
+            $result = $this->pythonService->process('visualize_suggestions.py', [
+                'file_type' => $file->file_type,
+                'file_path' => storage_path("app/public/{$file->file_path}")
+            ]);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'columns' => [],
+                'suggested_charts' => [],
+                'suggested_correlation_columns' => [],
+                'suggested_regression_pairs' => []
+            ], 500);
+        }
+    }
+
+    public function visualizeBuild(Request $request, string $slug): JsonResponse
+    {
+        $validated = $request->validate([
+            'charts' => 'nullable|array',
+            'charts.*.type' => 'required|string',
+            'charts.*.column' => 'nullable|string',
+            'charts.*.x_column' => 'nullable|string',
+            'charts.*.y_column' => 'nullable|string',
+            'correlation_columns' => 'nullable|array',
+            'correlation_columns.*' => 'string',
+            'regression' => 'nullable|array',
+            'regression.x_column' => 'nullable|string',
+            'regression.y_column' => 'nullable|string',
+        ]);
+
+        try {
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
+
+            $result = $this->pythonService->process('visualize_build.py', [
+                'file_type' => $file->file_type,
+                'file_path' => storage_path("app/public/{$file->file_path}"),
+                'charts' => $validated['charts'] ?? [],
+                'correlation_columns' => $validated['correlation_columns'] ?? [],
+                'regression' => $validated['regression'] ?? [],
+            ]);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'charts' => [],
+                'correlation' => null,
+                'regression' => null
+            ], 500);
+        }
+    }
+
+    public function insightStrategy(string $slug): View|Factory|RedirectResponse
+    {
+        try {
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
+            return view('files.insight_strategy', compact('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('files.list')
+                ->with('error', 'File not found: ' . $e->getMessage());
+        }
+    }
+
+    public function insightStrategyData(string $slug): JsonResponse
+    {
+        try {
+            $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
+
+            $result = $this->pythonService->process('insight_strategy_engine.py', [
+                'file_type' => $file->file_type,
+                'file_path' => storage_path("app/public/{$file->file_path}")
+            ]);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'key_findings' => [],
+                'risks' => [],
+                'strategies' => []
+            ], 500);
+        }
+    }
 }

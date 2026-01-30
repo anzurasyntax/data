@@ -14,8 +14,28 @@ class StoreUploadedFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file_type' => 'required|string',
-            'file'      => 'required|file'
+            'file_type' => 'required|string|in:txt,csv,xml,xlsx',
+            'file'      => 'required|file',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if (!$this->hasFile('file')) {
+                return;
+            }
+
+            $selectedType = strtolower((string) $this->input('file_type'));
+            $uploadedFile = $this->file('file');
+            $extension = strtolower((string) ($uploadedFile->getClientOriginalExtension() ?: $uploadedFile->extension()));
+
+            if ($selectedType && $extension && $selectedType !== $extension) {
+                $validator->errors()->add(
+                    'file',
+                    'The selected file must be of type ' . strtoupper($selectedType) . " (you uploaded: .$extension)."
+                );
+            }
+        });
     }
 }

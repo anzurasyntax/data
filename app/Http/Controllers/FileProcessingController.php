@@ -28,6 +28,7 @@ class FileProcessingController extends Controller
     }
 
     public function show(string $slug): View|Factory|RedirectResponse
+
     {
         try {
             $file = $this->fileService->findForUserBySlug($slug, (int) Auth::id());
